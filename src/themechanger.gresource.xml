@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/github/alex11br/themechanger">
+    <file>searchablethemelist.ui</file>
+    <file>window.ui</file>
+  </gresource>
+</gresources>

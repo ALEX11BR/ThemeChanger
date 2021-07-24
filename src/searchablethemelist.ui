@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <template class="SearchableThemeList" parent="GtkBin">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkSearchEntry" id="themesSearchEntry">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="primary-icon-name">edit-find-symbolic</property>
+            <property name="primary-icon-activatable">False</property>
+            <property name="primary-icon-sensitive">False</property>
+            <signal name="changed" handler="onChangeFilter" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="themesScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
+            <child>
+              <object class="GtkTreeView" id="themesTreeView">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="headers-visible">False</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="themesTreeViewSelection">
+                    <signal name="changed" handler="onThemeSelected" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
