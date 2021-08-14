@@ -125,7 +125,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
 
         self.hintingCombobox.set_active_id(self.gtkProps.gtk_xft_hintstyle if (self.gtkProps.gtk_xft_hinting != 0) else "hintnone")
 
-        self.subpixelCombobox.set_active_id(self.gtkProps.gtk_xft_rgba)
+        self.subpixelCombobox.set_active_id(self.gtkProps.gtk_xft_rgba or "none")
         
         # To properly have CSS live reloading, we'll have to handle the case in which properties form an existing CSS file get deleted, e.g.
         ######################    ######################
@@ -336,8 +336,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             gtkKeyFile.set_string("Settings", "gtk-font-name", self.gtkProps.gtk_font_name)
             gtkKeyFile.set_integer("Settings", "gtk-xft-antialias", self.gtkProps.gtk_xft_antialias)
             gtkKeyFile.set_integer("Settings", "gtk-xft-hinting", self.gtkProps.gtk_xft_hinting)
-            gtkKeyFile.set_string("Settings", "gtk-xft-hintstyle", self.gtkProps.gtk_xft_hintstyle)
-            gtkKeyFile.set_string("Settings", "gtk-xft-rgba", self.gtkProps.gtk_xft_rgba)
+            gtkKeyFile.set_string("Settings", "gtk-xft-hintstyle", self.gtkProps.gtk_xft_hintstyle or "hintnone")
+            gtkKeyFile.set_string("Settings", "gtk-xft-rgba", self.gtkProps.gtk_xft_rgba or "none")
             gtkKeyFile.set_integer("Settings", "gtk-xft-dpi", self.gtkProps.gtk_xft_dpi)
             gtkKeyFile.set_boolean("Settings", "gtk-overlay-scrolling", self.gtkProps.gtk_overlay_scrolling)
 
