@@ -1,7 +1,7 @@
 import os
 import configparser
 import traceback
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, GdkPixbuf
 
 def uniquifySortedListStore(listStore):
     prev = None
@@ -12,9 +12,13 @@ def uniquifySortedListStore(listStore):
     return listStore
 
 def getAvailableGtk3Themes():
-    availableThemes = Gtk.ListStore(str, str)
+    availableThemes = Gtk.ListStore(str, str, GdkPixbuf.Pixbuf)
     availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
-    availableThemes.append(["Adwaita", "Adwaita"])
+    availableThemes.append([" Adwaita", "Adwaita",
+        GdkPixbuf.Pixbuf.new_from_resource(
+            "/com/github/alex11br/themechanger/adwaita.png"
+        )
+    ])
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "themes"),
         os.path.join(GLib.get_home_dir(), ".themes"),
@@ -23,8 +27,16 @@ def getAvailableGtk3Themes():
     for lookupPath in lookupPaths:
         try:
             for f in os.listdir(lookupPath):
-                if os.path.isfile(os.path.join(lookupPath, f, "gtk-3.0", "gtk.css")):
-                    availableThemes.append([f, f])
+                if f != "Adwaita" and os.path.isfile(os.path.join(lookupPath, f, "gtk-3.0", "gtk.css")):
+                    thumbnailFile = os.path.join(lookupPath, f, "gtk-3.0", "thumbnail.png")
+                    availableThemes.append([
+                        " "+f, f,
+                        GdkPixbuf.Pixbuf.new_from_file_at_size(
+                            thumbnailFile, 120, 35
+                        ) if os.path.isfile(thumbnailFile) else GdkPixbuf.Pixbuf.new_from_resource(
+                            "/com/github/alex11br/themechanger/unknown.png"
+                        )
+                    ])
         except:
             pass
     return uniquifySortedListStore(availableThemes)

@@ -52,7 +52,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.gtkSearchableThemeList = SearchableThemeList(
             getAvailableGtk3Themes(),
             self.gtkProps.gtk_theme_name,
-            self.onGtkThemeChanged
+            self.onGtkThemeChanged,
+            True
         )
         self.gtkThemesBox.pack_start(self.gtkSearchableThemeList, True, True, 0)
 

@@ -9,7 +9,7 @@ class SearchableThemeList(Gtk.Bin):
     themesTreeView = Gtk.Template.Child()
     themesTreeViewSelection = Gtk.Template.Child()
 
-    def __init__(self, themesTreeViewModel, selectedTheme, onThemeSelectedCallback, *args):
+    def __init__(self, themesTreeViewModel, selectedTheme, onThemeSelectedCallback, hasPixbuf=False, *args):
         Gtk.Bin.__init__(self, *args)
 
         self.selectedTheme = selectedTheme
@@ -18,6 +18,11 @@ class SearchableThemeList(Gtk.Bin):
 
         themeColumn = Gtk.TreeViewColumn("Theme")
 
+        if hasPixbuf:
+            pixbufCell = Gtk.CellRendererPixbuf()
+            themeColumn.pack_start(pixbufCell, False)
+            themeColumn.add_attribute(pixbufCell, "pixbuf", 2)
+            
         nameCell = Gtk.CellRendererText()
         themeColumn.pack_start(nameCell, True)
         themeColumn.add_attribute(nameCell, "text", 0)

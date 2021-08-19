@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/alex11br/themechanger">
+    <file>adwaita.png</file>
+    <file>unknown.png</file>
     <file>searchablethemelist.ui</file>
     <file>window.ui</file>
   </gresource>
