@@ -42,7 +42,7 @@ def getAvailableGtk3Themes():
     return uniquifySortedListStore(availableThemes)
 
 def getAvailableIconThemes():
-    availableThemes = Gtk.ListStore(str, str)
+    availableThemes = Gtk.ListStore(str, str, GdkPixbuf.Pixbuf)
     availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "icons"),
@@ -53,11 +53,21 @@ def getAvailableIconThemes():
         try:
             for f in os.listdir(lookupPath):
                 if f != "default":
+                    iconTheme = Gtk.IconTheme.new()
+                    iconTheme.set_custom_theme(f)
                     try:
                         themeFileParser = GLib.KeyFile()
-                        themeFileParser.load_from_file(os.path.join(lookupPath, f, "index.theme"), GLib.KeyFileFlags.NONE)
+                        themeFileParser.load_from_file(
+                            os.path.join(lookupPath, f, "index.theme"), GLib.KeyFileFlags.NONE
+                        )
                         if (themeFileParser.get_string("Icon Theme", "Directories")):
-                            availableThemes.append([themeFileParser.get_locale_string("Icon Theme", "Name"), f])
+                            availableThemes.append([
+                                themeFileParser.get_locale_string("Icon Theme", "Name"), f,
+                                iconTheme.load_icon(
+                                    iconTheme.get_example_icon_name(),
+                                    32, Gtk.IconLookupFlags.FORCE_SIZE
+                                )
+                            ])
                     except:
                         pass
         except:

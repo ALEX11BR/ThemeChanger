@@ -60,7 +60,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.iconSearchableThemeList = SearchableThemeList(
             getAvailableIconThemes(),
             self.gtkProps.gtk_icon_theme_name,
-            self.onIconThemeChanged
+            self.onIconThemeChanged,
+            True
         )
         self.iconThemesBox.pack_start(self.iconSearchableThemeList, True, True, 0)
 
