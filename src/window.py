@@ -49,6 +49,51 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         super().__init__(title="Theme Changer", application=app)
 
+        # To properly have CSS live reloading, we'll have to handle the case in which properties form an existing CSS file get deleted, e.g.
+        ######################    ######################
+        # background: green; # -> # /* gone */         #
+        ######################    ######################
+        # GTK still loads these properties during the app initialization at the highest priority,
+        # and even if the user deletes them, they still remain set there in the loaded CSS properties and thus still have effect.
+        # To address this, at the highest priority we'll have to add first an all-round unsetter...
+        self.unsetterCssProvider = Gtk.CssProvider()
+        self.unsetterCssProvider.load_from_data(b"""
+            * {
+                all: unset;
+            }
+        """)
+        Gtk.StyleContext.add_provider_for_screen(
+            self.defaultScreen, self.unsetterCssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER
+        )
+        # Now we'll start putting the CSS providers that normally exist in a GTK application: the one with the GTK theme...
+        self.gtkThemeCssProvider = Gtk.CssProvider.get_named(self.gtkProps.gtk_theme_name, "dark" if self.gtkProps.gtk_application_prefer_dark_theme else None)
+        Gtk.StyleContext.add_provider_for_screen(
+            self.defaultScreen, self.gtkThemeCssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER
+        )
+        # ...and the GTK settings, a provider in and of itself
+        # TODO: The add_provider method from a dedicated instance doesn't work at all for any style provider, and this one crashes the app
+        # Without the gtk settings, we'll have to do some extra work to instantly reload gtk themes i.e to updateGtkThemeCssProvider
+        """
+        Gtk.StyleContext.add_provider_for_screen(
+            self.defaultScreen, Gtk.Settings.get_default(), Gtk.STYLE_PROVIDER_PRIORITY_USER
+        )
+        """
+        # Now we'll add the CSS provider that will change as the user types in the textbox
+        # Its value will get set automatically as we set the cssTextBuffer text, as a part of the set_text signal
+        self.cssProvider = Gtk.CssProvider()
+        Gtk.StyleContext.add_provider_for_screen(
+            self.defaultScreen, self.cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER+1
+            # A higher priority than the USER one, to allow a theme change without requiring heavy meddling with the cssProvider
+        )
+        
+        # Now we'll set up the widgets
+        try:
+            with open(self.cssPath, "r") as cssFile:
+                self.cssTextBuffer.set_text(cssFile.read())
+        # If the CSS file doesn't exist (or we are unable to access it for reading), we'll set up a nice text placeholder
+        except:
+            self.cssTextBuffer.set_text("/* Feel free to edit this and see instantaneous results */")
+
         self.gtkSearchableThemeList = SearchableThemeList(
             getAvailableGtk3Themes(),
             self.gtkProps.gtk_theme_name,
@@ -129,49 +174,6 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
 
         self.subpixelCombobox.set_active_id(self.gtkProps.gtk_xft_rgba or "none")
         
-        # To properly have CSS live reloading, we'll have to handle the case in which properties form an existing CSS file get deleted, e.g.
-        ######################    ######################
-        # background: green; # -> # /* gone */         #
-        ######################    ######################
-        # GTK still loads these properties during the app initialization at the highest priority,
-        # and even if the user deletes them, they still remain set there in the loaded CSS properties and thus still have effect.
-        # To address this, at the highest priority we'll have to add first an all-round unsetter...
-        self.unsetterCssProvider = Gtk.CssProvider()
-        self.unsetterCssProvider.load_from_data(b"""
-            * {
-                all: unset;
-            }
-        """)
-        Gtk.StyleContext.add_provider_for_screen(
-            self.defaultScreen, self.unsetterCssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER
-        )
-        # Now we'll start putting the CSS providers that normally exist in a GTK application: the one with the GTK theme...
-        self.gtkThemeCssProvider = Gtk.CssProvider.get_named(self.gtkProps.gtk_theme_name, "dark" if self.gtkProps.gtk_application_prefer_dark_theme else None)
-        Gtk.StyleContext.add_provider_for_screen(
-            self.defaultScreen, self.gtkThemeCssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER
-        )
-        # ...and the GTK settings, a provider in and of itself
-        # TODO: The add_provider method from a dedicated instance doesn't work at all for any style provider, and this one crashes the app
-        # Without the gtk settings, we'll have to do some extra work to instantly reload gtk themes i.e to updateGtkThemeCssProvider
-        """
-        Gtk.StyleContext.add_provider_for_screen(
-            self.defaultScreen, Gtk.Settings.get_default(), Gtk.STYLE_PROVIDER_PRIORITY_USER
-        )
-        """
-        # Now we'll add the CSS provider that will change as the user types in the textbox
-        # Its value will get set automatically as we set the cssTextBuffer text, as a part of the set_text signal
-        self.cssProvider = Gtk.CssProvider()
-        Gtk.StyleContext.add_provider_for_screen(
-            self.defaultScreen, self.cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER+1
-            # A higher priority than the USER one, to allow a theme change without requiring heavy meddling with the cssProvider
-        )
-        # Our mission here is over. We are left with setting up the textbox with the css of the CSS file...
-        try:
-            with open(self.cssPath, "r") as cssFile:
-                self.cssTextBuffer.set_text(cssFile.read())
-        # ...if it doesn't exist (or we are unable to access it for reading), we'll set up a nice text placeholder
-        except:
-            self.cssTextBuffer.set_text("/* Feel free to edit this and see instantaneous results */")
 
     def updateGtkThemeCssProvider(self):
         gtkThemeCssProvider = Gtk.CssProvider.get_named(self.gtkProps.gtk_theme_name, "dark" if self.gtkProps.gtk_application_prefer_dark_theme else None)
