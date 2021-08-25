@@ -29,11 +29,7 @@ class SearchableThemeList(Gtk.Bin):
 
         self.themesTreeView.append_column(themeColumn)
 
-    def setThemesTreeViewModel(self, themesTreeViewModel):
-        self.themesTreeViewModelFiltered = themesTreeViewModel.filter_new()
-        self.themesTreeViewModelFiltered.set_visible_func(self.filterFunc)
-        self.themesTreeView.set_model(self.themesTreeViewModelFiltered)
-
+    def selectTheme(self):
         for row in self.themesTreeViewModelFiltered:
             if self.selectedTheme == row[1]:
                 self.themesTreeViewSelection.select_iter(row.iter)
@@ -41,7 +37,19 @@ class SearchableThemeList(Gtk.Bin):
                     self.themesTreeViewModelFiltered.get_path(row.iter),
                     None, False
                 )
-                break
+                return
+        # Maybe the selectedTheme isn't in the model; we'll properly handle this case here
+        firstRow = self.themesTreeViewModelFiltered[0]
+        self.selectedTheme = firstRow[1]
+        self.themesTreeViewSelection.select_iter(firstRow.iter)
+        self.themesTreeView.scroll_to_point(0, 0)
+
+    def setThemesTreeViewModel(self, themesTreeViewModel):
+        self.themesTreeViewModelFiltered = themesTreeViewModel.filter_new()
+        self.themesTreeViewModelFiltered.set_visible_func(self.filterFunc)
+        self.themesTreeView.set_model(self.themesTreeViewModelFiltered)
+
+        self.selectTheme()
 
     def setScrolledWindowOverlayScrolling(self, state):
         self.themesScrolledWindow.set_overlay_scrolling(state)
@@ -52,10 +60,17 @@ class SearchableThemeList(Gtk.Bin):
     @Gtk.Template.Callback()
     def onThemeSelected(self, selection):
         model, treeiter = selection.get_selected()
+        # Sometimes the TreeSelection "changed" signal gets triggered when nothing has happened (as the docs say)
+        # This makes this function run multiple times when searching stuff for some reason
+        # In this case the selection is None, which breaks the theme name getting mechanism below; so we shield against this case
+        if not treeiter:
+            return
         self.selectedTheme = model[treeiter][1]
         self.onThemeSelectedCallback(self.selectedTheme)
 
     @Gtk.Template.Callback()
     def onChangeFilter(self, searchentry):
         self.themesTreeViewModelFiltered.refilter()
+        # This handles the case in which the newly filtered model doen't have the selectedTheme anymore
+        self.selectTheme()
         
