@@ -175,10 +175,10 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
 
     def updateGtkThemeCssProvider(self):
         gtkThemeCssProvider = Gtk.CssProvider.get_named(self.gtkProps.gtk_theme_name, "dark" if self.gtkProps.gtk_application_prefer_dark_theme else None)
+        Gtk.StyleContext.remove_provider_for_screen(self.defaultScreen, self.gtkThemeCssProvider)
         Gtk.StyleContext.add_provider_for_screen(
             self.defaultScreen, gtkThemeCssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER
         )
-        Gtk.StyleContext.remove_provider_for_screen(self.defaultScreen, self.gtkThemeCssProvider)
         self.gtkThemeCssProvider = gtkThemeCssProvider
 
     def setDefaultCursor(self):
