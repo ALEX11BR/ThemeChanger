@@ -77,6 +77,7 @@ def getAvailableIconThemes():
 def getAvailableCursorThemes():
     availableThemes = Gtk.ListStore(str, str)
     availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
+    availableThemes.append(["Default cursor", "default"])
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "icons"),
         os.path.join(GLib.get_home_dir(), ".icons"),
