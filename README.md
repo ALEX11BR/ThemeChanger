@@ -5,12 +5,11 @@ It also lets the user install icon and widget theme archives.
 
 # Installation
 ## From source
-Make sure you have installed PyGobject, Gtk3, GLib (for the app running), meson, ninja (for the installation process).
+Make sure you have installed PyGobject, Gtk3, GLib (for the app running); headers thereof, meson, ninja (for the installation process).
 
 In the folder with the source (obtainable e.g. by running `git clone https://github.com/ALEX11BR/ThemeChanger`) run `meson build`, then `ninja -C build install`, and you're ready to go!
 
 # TODOs
-- In the themes list add an identifying image for ~~each theme~~ cursor themes (for GTK and icon themes they're implemented), as they require use of libXcursor, which doesn't have a Python binding yet (see some C implementations from [XFCE](https://gitlab.xfce.org/xfce/xfce4-settings/-/blob/master/dialogs/mouse-settings/main.c#L175) and [MATE](https://github.com/mate-desktop/mate-control-center/blob/master/capplets/common/mate-theme-info.c#L498))
 - Add some sort of Kvantum support
 - Add more options to set (see [further reference](https://developer.gnome.org/gtk3/stable/GtkSettings.html))
 - Add theme remover

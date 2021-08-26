@@ -113,7 +113,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.cursorSearchableThemeList = SearchableThemeList(
             getAvailableCursorThemes(),
             self.gtkProps.gtk_cursor_theme_name or "default",
-            self.onCursorThemeChanged
+            self.onCursorThemeChanged,
+            True
         )
         self.cursorThemesBox.pack_start(self.cursorSearchableThemeList, True, True, 0)
 

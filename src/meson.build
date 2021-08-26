@@ -9,14 +9,31 @@ gnome.compile_resources('themechanger',
   install_dir: pkgdatadir,
 )
 
-python = import('python')
+python = import('python').find_installation('python3')
 
 conf = configuration_data()
-conf.set('PYTHON', python.find_installation('python3').path())
+conf.set('PYTHON', python.path())
 conf.set('VERSION', meson.project_version())
 conf.set('localedir', join_paths(get_option('prefix'), get_option('localedir')))
 conf.set('pkgdatadir', pkgdatadir)
 conf.set('gtkversion', '3.0')
+
+pythondep = python.dependency(version: '>= 3.5')
+pygobjectdep = dependency('pygobject-3.0')
+xcursordep = dependency('xcursor')
+gdkpixbufdep = dependency('gdk-pixbuf-2.0')
+
+pixbuffromxcursor = python.extension_module('pixbuffromxcursor',
+  'pixbuffromxcursor.c',
+  dependencies: [
+    pythondep,
+    pygobjectdep,
+    xcursordep,
+    gdkpixbufdep
+  ],
+  install: true,
+  install_dir: moduledir
+)
 
 configure_file(
   input: 'themechanger.in',

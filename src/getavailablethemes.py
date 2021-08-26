@@ -3,6 +3,8 @@ import configparser
 import traceback
 from gi.repository import Gtk, GLib, GdkPixbuf
 
+from .pixbuffromxcursor import pixbufFromXCursor
+
 def uniquifySortedListStore(listStore):
     prev = None
     for row in listStore:
@@ -75,9 +77,14 @@ def getAvailableIconThemes():
     return uniquifySortedListStore(availableThemes)
 
 def getAvailableCursorThemes():
-    availableThemes = Gtk.ListStore(str, str)
+    availableThemes = Gtk.ListStore(str, str, GdkPixbuf.Pixbuf)
     availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
-    availableThemes.append(["Default cursor", "default"])
+    availableThemes.append([
+        "Default cursor", "default",
+        GdkPixbuf.Pixbuf.new_from_resource(
+            "/com/github/alex11br/themechanger/defaultcursor.png"
+        )
+    ])
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "icons"),
         os.path.join(GLib.get_home_dir(), ".icons"),
@@ -87,10 +94,20 @@ def getAvailableCursorThemes():
         try:
             for f in os.listdir(lookupPath):
                 if f != "default" and os.path.isdir(os.path.join(lookupPath, f, "cursors")):
+                    cursorPath = os.path.join(lookupPath, f, "cursors", "left_ptr")
                     try:
                         themeFileParser = GLib.KeyFile()
-                        themeFileParser.load_from_file(os.path.join(lookupPath, f, "index.theme"), GLib.KeyFileFlags.NONE)
-                        availableThemes.append([themeFileParser.get_locale_string("Icon Theme", "Name"), f])
+                        themeFileParser.load_from_file(
+                            os.path.join(lookupPath, f, "index.theme"), GLib.KeyFileFlags.NONE
+                        )
+                        availableThemes.append([
+                            themeFileParser.get_locale_string("Icon Theme", "Name"), f,
+                            pixbufFromXCursor(
+                                cursorPath
+                            ) if os.path.isfile(cursorPath) else GdkPixbuf.Pixbuf.new_from_resource(
+                                "/com/github/alex11br/themechanger/defaultcursor.png"
+                            )
+                        ])
                     except:
                         pass
         except:

@@ -3,6 +3,7 @@
   <gresource prefix="/com/github/alex11br/themechanger">
     <file>adwaita.png</file>
     <file>unknown.png</file>
+    <file>defaultcursor.png</file>
     <file>searchablethemelist.ui</file>
     <file>window.ui</file>
   </gresource>
