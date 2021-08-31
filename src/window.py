@@ -1,9 +1,10 @@
 import os
+import shutil
 
 from gi.repository import Gtk, Gdk, GLib
 
 from .installthemes import showArchiveChooserDialog, showErrorDialog, showSuccessDialog, installThemeArchive, checkIconIndexFile
-from .getavailablethemes import getAvailableGtk3Themes, getAvailableIconThemes, getAvailableCursorThemes, getAvailableGtk2Themes, getAvailableGtk4Themes
+from .getavailablethemes import getAvailableGtk3Themes, getAvailableIconThemes, getAvailableCursorThemes, getAvailableGtk2Themes, getAvailableGtk4Themes, getAvailableKvantumThemes
 from .searchablethemelist import SearchableThemeList
 
 @Gtk.Template(resource_path='/com/github/alex11br/themechanger/window.ui')
@@ -28,6 +29,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     anotherGtk2ThemeSwitch = Gtk.Template.Child()
     anotherGtk4ThemeBox = Gtk.Template.Child()
     anotherGtk4ThemeSwitch = Gtk.Template.Child()
+    kvantumThemeBox = Gtk.Template.Child()
+    anotherKvantumThemeSwitch = Gtk.Template.Child()
     menuImagesSwitch = Gtk.Template.Child()
     buttonImagesSwitch = Gtk.Template.Child()
     customCursorSizeSwitch = Gtk.Template.Child()
@@ -151,6 +154,25 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.anotherGtk4ThemeSwitch.set_active(hasAnotherGtk4Theme)
         self.gtk4SearchableThemeList.set_visible(hasAnotherGtk4Theme)
 
+        if shutil.which("kvantummanager"):
+            try:
+                kvantumKeyFile = GLib.KeyFile()
+                kvantumKeyFile.load_from_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"), GLib.KeyFileFlags.NONE)
+                self.kvantumThemeName = kvantumKeyFile.get_string("General", "theme")
+            except:
+                self.kvantumThemeName = self.gtkProps.gtk_theme_name
+            hasAnotherKvantumTheme = self.gtkProps.gtk_theme_name != self.kvantumThemeName
+            self.kvantumSearchableThemeList = SearchableThemeList(
+                getAvailableKvantumThemes(),
+                self.kvantumThemeName,
+                self.onKvantumThemeChanged
+            )
+            self.kvantumThemeBox.pack_start(self.kvantumSearchableThemeList, True, True, 0)
+            self.anotherKvantumThemeSwitch.set_active(hasAnotherKvantumTheme)
+            self.kvantumSearchableThemeList.set_visible(hasAnotherKvantumTheme)
+        else:
+            self.kvantumThemeBox.set_visible(False)
+
         self.darkVariantSwitch.set_active(self.gtkProps.gtk_application_prefer_dark_theme)
 
         self.emacsShortcutsSwitch.set_active(self.gtkProps.gtk_key_theme_name == 'Emacs')
@@ -197,6 +219,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             self.gtk2ThemeName = themename
         if not self.anotherGtk4ThemeSwitch.get_active():
             self.gtk4ThemeName = themename
+        if self.kvantumThemeBox.get_visible() and not self.anotherKvantumThemeSwitch.get_active():
+            self.kvantumThemeName = themename
 
         self.updateGtkThemeCssProvider()
 
@@ -216,6 +240,10 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     def onGtk4ThemeChanged(self, themename):
         self.onSettingChanged()
         self.gtk4ThemeName = themename
+
+    def onKvantumThemeChanged(self, themename):
+        self.onSettingChanged()
+        self.kvantumThemeName = themename
 
     @Gtk.Template.Callback()
     def darkVariantSwitchStateSet(self, switch, state):
@@ -245,6 +273,11 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     def anotherGtk4ThemeSwitchStateSet(self, switch, state):
         self.gtk4ThemeName = self.gtk4SearchableThemeList.selectedTheme if state else self.gtkProps.gtk_theme_name
         self.gtk4SearchableThemeList.set_visible(state)
+
+    @Gtk.Template.Callback()
+    def anotherKvantumThemeSwitchStateSet(self, switch, state):
+        self.kvantumThemeName = self.kvantumSearchableThemeList.selectedTheme if state else self.gtkProps.gtk_theme_name
+        self.kvantumSearchableThemeList.set_visible(state)
 
     @Gtk.Template.Callback()
     def menuImagesSwitchStateSet(self, switch, state):
@@ -315,6 +348,11 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
                 iconKeyFile.set_string("Icon Theme", "Inherits", self.gtkProps.gtk_cursor_theme_name)
                 iconKeyFile.save_to_file(os.path.join(GLib.get_home_dir(), ".icons", "default", "index.theme"))
 
+            if self.kvantumThemeBox.get_visible():
+                kvantumKeyFile = GLib.KeyFile()
+                kvantumKeyFile.set_string("General", "theme", self.kvantumThemeName)
+                kvantumKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"))
+                
             with open(os.path.join(GLib.get_home_dir(), ".gtkrc-2.0"), "w") as gtk2File:
                 gtk2File.write(f'gtk-theme-name="{self.gtk2ThemeName}"\n')
                 gtk2File.write(f'gtk-icon-theme-name="{self.gtkProps.gtk_icon_theme_name}"\n')

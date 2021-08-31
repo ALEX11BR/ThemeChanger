@@ -148,3 +148,20 @@ def getAvailableGtk2Themes():
         except:
             pass
     return uniquifySortedListStore(availableThemes)
+
+def getAvailableKvantumThemes():
+    availableThemes = Gtk.ListStore(str, str)
+    availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
+    availableThemes.append(["Kvantum", "default"])
+    lookupPaths = [
+        os.path.join(GLib.get_user_config_dir(), "Kvantum"),
+        "/usr/share/Kvantum"
+    ]
+    for lookupPath in lookupPaths:
+        try:
+            for f in os.listdir(lookupPath):
+                if "#" not in f and os.path.isfile(os.path.join(lookupPath, f, f+".kvconfig")):
+                    availableThemes.append([f, f])
+        except:
+            pass
+    return uniquifySortedListStore(availableThemes)

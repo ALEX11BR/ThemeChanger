@@ -1,6 +1,6 @@
 # ThemeChanger
 This app is a theme changing utility for Linux, BSDs, and whatnots.
-It lets the user change GTK 2/3/4, icon and cursor themes, edit GTK CSS with live preview, and set some related options.
+It lets the user change GTK 2/3/4, Kvantum, icon and cursor themes, edit GTK CSS with live preview, and set some related options.
 It also lets the user install icon and widget theme archives.
 
 # Installation
@@ -10,7 +10,7 @@ Make sure you have installed PyGobject, Gtk3, GLib (for the app running); header
 In the folder with the source (obtainable e.g. by running `git clone https://github.com/ALEX11BR/ThemeChanger`) run `meson build`, then `ninja -C build install`, and you're ready to go!
 
 # TODOs
-- Add some sort of Kvantum support
+- Add more advanced Kvantum support (e.g. handling of the Kvantum theme names, which in so many times doesn't match the GTK theme names, or syncing some options)
 - Add more options to set (see [further reference](https://developer.gnome.org/gtk3/stable/GtkSettings.html))
 - Add theme remover
 - Add a client for OCS-compatible websites like gnome-look.org, tailored for downloading (and automatically installing) themes (see [API reference]() and [a reference project](https://www.opencode.net/dfn2/pling-store-development))
