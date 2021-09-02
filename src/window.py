@@ -3,7 +3,7 @@ import shutil
 
 from gi.repository import Gtk, Gdk, GLib
 
-from .installthemes import showArchiveChooserDialog, showErrorDialog, showSuccessDialog, installThemeArchive, checkIconIndexFile
+from .installthemes import showArchiveChooserDialog, showErrorDialog, showSuccessDialog, installThemeArchive, checkIconIndexFile, checkKvantumFile
 from .getavailablethemes import getAvailableGtk3Themes, getAvailableIconThemes, getAvailableCursorThemes, getAvailableGtk2Themes, getAvailableGtk4Themes, getAvailableKvantumThemes
 from .searchablethemelist import SearchableThemeList
 
@@ -42,6 +42,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     hintingCombobox = Gtk.Template.Child()
     subpixelCombobox = Gtk.Template.Child()
     cssTextBuffer = Gtk.Template.Child()
+    kvantumThemeInstallButton = Gtk.Template.Child()
 
     gtkThemesApplyButton = Gtk.Template.Child()
     iconThemesApplyButton = Gtk.Template.Child()
@@ -83,6 +84,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         """
         # Now we'll add the CSS provider that will change as the user types in the textbox
         # Its value will get set automatically as we set the cssTextBuffer text, as a part of the set_text signal
+        # We'll ensure first that the current working directory is the one with the CSS's in them to make sure @import's work as intended
+        os.chdir(os.path.join(GLib.get_user_config_dir(), "gtk-3.0"))
         self.cssProvider = Gtk.CssProvider()
         Gtk.StyleContext.add_provider_for_screen(
             self.defaultScreen, self.cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER+1
@@ -172,6 +175,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             self.kvantumSearchableThemeList.set_visible(hasAnotherKvantumTheme)
         else:
             self.kvantumThemeBox.set_visible(False)
+            self.kvantumThemeInstallButton.set_visible(False)
 
         self.darkVariantSwitch.set_active(self.gtkProps.gtk_application_prefer_dark_theme)
 
@@ -428,6 +432,15 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         )
         self.iconSearchableThemeList.setThemesTreeViewModel(getAvailableIconThemes())
         self.cursorSearchableThemeList.setThemesTreeViewModel(getAvailableCursorThemes())
+
+    @Gtk.Template.Callback()
+    def installKvantumTheme(self, *args):
+        self.installArchive(
+            "Kvantum", "Widgets",
+            os.path.join(GLib.get_user_config_dir(), "Kvantum"),
+            "*.kvconfig", 1, checkKvantumFile
+        )
+        self.kvantumSearchableThemeList.setThemesTreeViewModel(getAvailableKvantumThemes())
 
     @Gtk.Template.Callback()
     def onSettingChanged(self, *args):

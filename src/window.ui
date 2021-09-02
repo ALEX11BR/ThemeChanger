@@ -2,6 +2,21 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
+  <object class="GtkImage" id="addImage1">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">list-add</property>
+  </object>
+  <object class="GtkImage" id="addImage2">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">list-add</property>
+  </object>
+  <object class="GtkImage" id="addImage3">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">list-add</property>
+  </object>
   <object class="GtkTextBuffer" id="cssTextBuffer">
     <signal name="changed" handler="onCssTextBufferChanged" swapped="no"/>
     <signal name="changed" handler="onSettingChanged" swapped="no"/>
@@ -19,21 +34,12 @@
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
   </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">list-add</property>
-  </object>
-  <object class="GtkImage" id="image2">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">list-add</property>
-  </object>
   <template class="ThemechangerWindow" parent="GtkApplicationWindow">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Theme Changer</property>
-    <property name="default-width">600</property>
-    <property name="default-height">400</property>
+    <property name="default-width">800</property>
+    <property name="default-height">450</property>
+    <property name="icon-name">preferences-desktop-theme</property>
     <child>
       <object class="GtkNotebook">
         <property name="visible">True</property>
@@ -1277,7 +1283,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
-                        <property name="image">image1</property>
+                        <property name="image">addImage1</property>
                         <signal name="clicked" handler="installWidgetTheme" swapped="no"/>
                       </object>
                       <packing>
@@ -1292,7 +1298,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
-                        <property name="image">image2</property>
+                        <property name="image">addImage2</property>
                         <signal name="clicked" handler="installIconTheme" swapped="no"/>
                       </object>
                       <packing>
@@ -1315,6 +1321,21 @@
                         <property name="fill">True</property>
                         <property name="pack-type">end</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="kvantumThemeInstallButton">
+                        <property name="label" translatable="yes">Install Kvantum theme archive</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="image">addImage3</property>
+                        <signal name="clicked" handler="installKvantumTheme" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
