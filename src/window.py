@@ -267,6 +267,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.gtkSearchableThemeList.setScrolledWindowOverlayScrolling(not state)
         self.gtk2SearchableThemeList.setScrolledWindowOverlayScrolling(not state)
         self.gtk4SearchableThemeList.setScrolledWindowOverlayScrolling(not state)
+        if self.kvantumThemeBox.get_visible():
+            self.kvantumSearchableThemeList.setScrolledWindowOverlayScrolling(not state)
 
     @Gtk.Template.Callback()
     def anotherGtk2ThemeSwitchStateSet(self, switch, state):
