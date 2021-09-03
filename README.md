@@ -20,12 +20,17 @@ Install the `themechanger-git` package from the AUR the way you like it. For ins
 yay -S themechanger-git
 ```
 ## From source
-Make sure you have installed PyGobject, Gtk3, GLib (for the app running); headers thereof, meson, ninja (for the installation process).
+Make sure you have installed PyGobject, Gtk3, GLib (for the app running); headers thereof, meson, ninja (for the installation process). For reference, this is how you get the required dependencies on Ubuntu:
+```
+sudo apt install python3-gi libglib2.0 libgtk-3.0 # runtime dependencies
+sudo apt install meson gcc libglib2.0-dev-bin python3-dev python-gi-dev libxcursor-dev libgdk-pixbuf2.0-dev # build-time dependencies
+```
 
 In the folder with the source (obtainable e.g. by running `git clone https://github.com/ALEX11BR/ThemeChanger`) run `meson build`, then `ninja -C build install`, and you're ready to go!
 
 # TODOs
 - Add more advanced Kvantum support (e.g. handling of the Kvantum theme names, which oftentimes don't match the GTK theme names, or syncing some options)
+- Implement live reloading using xsettingsd.
 - Add more options to set (see [further reference](https://developer.gnome.org/gtk3/stable/GtkSettings.html))
 - Add theme remover
 - Add a client for OCS-compatible websites like gnome-look.org, tailored for downloading (and automatically installing) themes (see [API reference]() and [a reference project](https://www.opencode.net/dfn2/pling-store-development))
