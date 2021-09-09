@@ -1,6 +1,4 @@
 import os
-import configparser
-import traceback
 from gi.repository import Gtk, GLib, GdkPixbuf
 
 from .pixbuffromxcursor import pixbufFromXCursor
@@ -162,6 +160,8 @@ def getAvailableKvantumThemes():
             for f in os.listdir(lookupPath):
                 if "#" not in f and os.path.isfile(os.path.join(lookupPath, f, f+".kvconfig")):
                     availableThemes.append([f, f])
+                    if os.path.isfile(os.path.join(lookupPath, f, f+"Dark.kvconfig")):
+                        availableThemes.append([f+"Dark", f+"Dark"])
         except:
             pass
     return uniquifySortedListStore(availableThemes)
