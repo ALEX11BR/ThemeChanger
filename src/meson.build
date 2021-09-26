@@ -45,6 +45,7 @@ configure_file(
 
 themechanger_sources = [
   '__init__.py',
+  'applythemes.py',
   'archivefilefilter.py',
   'getavailablethemes.py',
   'installthemes.py',

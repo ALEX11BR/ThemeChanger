@@ -19,6 +19,7 @@ import shutil
 
 from gi.repository import Gtk, Gdk, GLib
 
+from .applythemes import getThemeApplier
 from .installthemes import showArchiveChooserDialog, showErrorDialog, showSuccessDialog, installThemeArchive, checkIconIndexFile, checkKvantumFile
 from .getavailablethemes import getAvailableGtk3Themes, getAvailableIconThemes, getAvailableCursorThemes, getAvailableGtk2Themes, getAvailableGtk4Themes, getAvailableKvantumThemes
 from .searchablethemelist import SearchableThemeList
@@ -115,6 +116,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         # If the CSS file doesn't exist (or we are unable to access it for reading), we'll set up a nice text placeholder
         except:
             self.cssTextBuffer.set_text("/* Feel free to edit this and see instantaneous results */")
+
+        self.themeApplier = getThemeApplier()
 
         self.gtkSearchableThemeList = SearchableThemeList(
             getAvailableGtk3Themes(),
@@ -409,6 +412,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             gtkKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "settings.ini"))
 
             gtkKeyFile.set_string("Settings", "gtk-theme-name", self.gtkProps.gtk_theme_name)
+            if self.gtkProps.gtk_key_theme_name:
+                gtkKeyFile.set_string("Settings", "gtk-key-theme-name", self.gtkProps.gtk_key_theme_name)
             gtkKeyFile.set_boolean("Settings", "gtk-menu-images", self.gtkProps.gtk_menu_images)
             gtkKeyFile.set_boolean("Settings", "gtk-button-images", self.gtkProps.gtk_button_images)
 
@@ -416,6 +421,21 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         except Exception as err:
             showErrorDialog("Error: Could not apply settings", str(err))
             self.onSettingChanged()
+        else:
+            self.themeApplier.applyThemes(
+                gtkTheme = self.gtkProps.gtk_theme_name,
+                iconTheme = self.gtkProps.gtk_icon_theme_name,
+                cursorTheme = self.gtkProps.gtk_cursor_theme_name or "default",
+                keyTheme = self.gtkProps.gtk_key_theme_name or '',
+                menuImages = self.gtkProps.gtk_menu_images,
+                buttonImages = self.gtkProps.gtk_button_images,
+                fontName = self.gtkProps.gtk_font_name,
+                antialias = self.gtkProps.gtk_xft_antialias,
+                hinting = self.gtkProps.gtk_xft_hinting,
+                hintstyle = self.gtkProps.gtk_xft_hintstyle or "hintnone",
+                rgba = self.gtkProps.gtk_xft_rgba or "none",
+                dpi = self.gtkProps.gtk_xft_dpi,
+            )
 
     def installArchive(self, kind, section, destination, anchorFile, anchorLevels, lookupFunction):
         archivePath = showArchiveChooserDialog(f'Select the {kind} theme archive file')
