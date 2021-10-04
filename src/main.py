@@ -34,10 +34,14 @@ class Application(Gtk.Application):
 
 
 def main(version):
-    # Here we're making some dirs necessary to prevent some "file not found" errors when writing when saving
+    # Here we're making some dirs necessary to prevent some "file not found" errors when saving
     os.makedirs(os.path.join(GLib.get_user_config_dir(), "gtk-3.0"), exist_ok=True)
     os.makedirs(os.path.join(GLib.get_user_config_dir(), "gtk-4.0"), exist_ok=True)
+    os.makedirs(os.path.join(GLib.get_user_config_dir(), "Kvantum"), exist_ok=True)
     os.makedirs(os.path.join(GLib.get_home_dir(), ".icons", "default"), exist_ok=True)
+    # Here we're good guys and touch the xsettingsd config file, as xsettingsd won't run at all if there's no config file
+    os.makedirs(os.path.join(GLib.get_user_config_dir(), "xsettingsd"), exist_ok=True)
+    open(os.path.join(GLib.get_user_config_dir(), "xsettingsd", "xsettingsd.conf"), "a").close()
 
     app = Application()
     return app.run(sys.argv)
