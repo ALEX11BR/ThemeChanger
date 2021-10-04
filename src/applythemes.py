@@ -14,46 +14,100 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import fileinput
 import os
 import subprocess
 
 from gi.repository import GLib
 
-class DummyApplyThemes:
-    def applyThemes(self, **kwargs):
-        print("Can't instantaneously apply themes")
+class BaseApplyThemes:
+    def applyThemes(self, props, gtk2Theme, gtk4Theme, kvantumTheme, cssText):
+        gtkKeyFile = GLib.KeyFile()
 
-class XsettingsdApplyThemes(DummyApplyThemes):
+        gtkKeyFile.set_string("Settings", "gtk-theme-name", gtk4Theme)
+        gtkKeyFile.set_boolean("Settings", "gtk-application-prefer-dark-theme", props.gtk_application_prefer_dark_theme)
+        gtkKeyFile.set_string("Settings", "gtk-icon-theme-name", props.gtk_icon_theme_name)
+        if props.gtk_cursor_theme_name:
+            gtkKeyFile.set_string("Settings", "gtk-cursor-theme-name", props.gtk_cursor_theme_name)
+        gtkKeyFile.set_integer("Settings", "gtk-cursor-theme-size", props.gtk_cursor_theme_size)
+        gtkKeyFile.set_string("Settings", "gtk-font-name", props.gtk_font_name)
+        gtkKeyFile.set_integer("Settings", "gtk-xft-antialias", props.gtk_xft_antialias)
+        gtkKeyFile.set_integer("Settings", "gtk-xft-hinting", props.gtk_xft_hinting)
+        gtkKeyFile.set_string("Settings", "gtk-xft-hintstyle", props.gtk_xft_hintstyle or "hintnone")
+        gtkKeyFile.set_string("Settings", "gtk-xft-rgba", props.gtk_xft_rgba or "none")
+        gtkKeyFile.set_integer("Settings", "gtk-xft-dpi", props.gtk_xft_dpi)
+        gtkKeyFile.set_boolean("Settings", "gtk-overlay-scrolling", props.gtk_overlay_scrolling)
+
+        gtkKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "settings.ini"))
+
+        gtkKeyFile.set_string("Settings", "gtk-theme-name", props.gtk_theme_name)
+        if props.gtk_key_theme_name:
+            gtkKeyFile.set_string("Settings", "gtk-key-theme-name", props.gtk_key_theme_name)
+        gtkKeyFile.set_boolean("Settings", "gtk-menu-images", props.gtk_menu_images)
+        gtkKeyFile.set_boolean("Settings", "gtk-button-images", props.gtk_button_images)
+
+        gtkKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "gtk-3.0", "settings.ini"))
+
+        if props.gtk_cursor_theme_name:
+            iconKeyFile = GLib.KeyFile()
+            iconKeyFile.set_string("Icon Theme", "Name", "Default")
+            iconKeyFile.set_string("Icon Theme", "Comment", "Default icon theme")
+            iconKeyFile.set_string("Icon Theme", "Inherits", props.gtk_cursor_theme_name)
+            iconKeyFile.save_to_file(os.path.join(GLib.get_home_dir(), ".icons", "default", "index.theme"))
+            
+        if kvantumTheme:
+            kvantumKeyFile = GLib.KeyFile()
+            kvantumKeyFile.set_string("General", "theme", kvantumTheme)
+            kvantumKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"))
+        
+        with open(os.path.join(GLib.get_home_dir(), ".gtkrc-2.0"), "w") as gtk2File:
+            gtk2File.write(f'gtk-theme-name="{gtk2Theme}"\n')
+            gtk2File.write(f'gtk-icon-theme-name="{props.gtk_icon_theme_name}"\n')
+            if props.gtk_cursor_theme_name:
+                gtk2File.write(f'gtk-cursor-theme-name="{props.gtk_cursor_theme_name}"\n')
+            gtk2File.write(f'gtk-font-name="{props.gtk_font_name}"\n')
+            gtk2File.write(f'gtk-menu-images={int(props.gtk_menu_images)}\n')
+            gtk2File.write(f'gtk-cursor-theme-size={props.gtk_cursor_theme_size}\n')
+            gtk2File.write(f'gtk-button-images={int(props.gtk_button_images)}\n')
+            gtk2File.write(f'gtk-xft-antialias={props.gtk_xft_antialias}\n')
+            gtk2File.write(f'gtk-xft-hinting={props.gtk_xft_hinting}\n')
+            gtk2File.write(f'gtk-xft-hintstyle="{props.gtk_xft_hintstyle}"\n')
+            gtk2File.write(f'gtk-xft-rgba="{props.gtk_xft_rgba}"\n')
+            gtk2File.write(f'gtk-xft-dpi={props.gtk_xft_dpi}\n')
+
+        with open(os.path.join(GLib.get_user_config_dir(), "gtk-3.0", "gtk.css"), "w") as cssFile:
+            cssFile.write(cssText)
+        with open(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "gtk.css"), "w") as cssFile:
+            cssFile.write(cssText)
+
+        
+class XsettingsdApplyThemes(BaseApplyThemes):
     def __init__(self):
         self.confFolder = os.path.join(GLib.get_user_config_dir(), "xsettingsd")
         try:
             os.mkdir(self.confFolder)
         except:
             pass
+        self.confFile = os.path.join(self.confFolder, "xsettingsd.conf")
 
-    def applyThemes(self, **kwargs):
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+
         options = {
-            "Net/ThemeName": f'"{kwargs["gtkTheme"]}"',
-            "Net/IconThemeName": f'"{kwargs["iconTheme"]}"',
-            "Xft/Antialias": kwargs["antialias"],
-            "Xft/Hinting": kwargs["hinting"],
-            "Xft/HintStyle": f'"{kwargs["hintstyle"]}"',
-            "Xft/RGBA": f'"{kwargs["rgba"]}"',
-            "Xft/DPI": kwargs["dpi"],
-            "Gtk/CursorThemeName": f'"{kwargs["cursorTheme"]}"',
-            "Gtk/FontName": f'"{kwargs["fontName"]}"',
-            "Gtk/KeyThemeName": f'"{kwargs["keyTheme"]}"',
-            "Gtk/MenuImages": int(kwargs["menuImages"]),
-            "Gtk/ButtonImages": int(kwargs["buttonImages"]),
+            "Net/ThemeName": f'"{props.gtk_theme_name}"',
+            "Net/IconThemeName": f'"{props.gtk_icon_theme_name}"',
+            "Xft/Antialias": props.gtk_xft_antialias,
+            "Xft/Hinting": props.gtk_xft_hinting,
+            "Xft/HintStyle": f'"{props.gtk_xft_hintstyle or "hintnone"}"',
+            "Xft/RGBA": f'"{props.gtk_xft_rgba or "none"}"',
+            "Xft/DPI": props.gtk_xft_dpi,
+            "Gtk/CursorThemeName": f'"{props.gtk_cursor_theme_name or "default"}"',
+            "Gtk/FontName": f'"{props.gtk_font_name}"',
+            "Gtk/KeyThemeName": f'"{props.gtk_key_theme_name or ""}"',
+            "Gtk/MenuImages": int(props.gtk_menu_images),
+            "Gtk/ButtonImages": int(props.gtk_button_images),
         }
 
-        confFile = os.path.join(self.confFolder, "xsettingsd.conf")
-        #for line in fileinput.FileInput(confFile, inplace=True):
-        #    if not line.split()[0] in options:
-        #        print(line, end="")
-            
-        with open(confFile, "w") as file:
+        with open(self.confFile, "w") as file:
             for option in options:
                 file.write(f'{option} {options[option]}\n')
         
@@ -63,4 +117,4 @@ def getThemeApplier():
     if subprocess.call(["pidof", "xsettingsd"], stdout=subprocess.DEVNULL) == 0:
         return XsettingsdApplyThemes()
     else:
-        return DummyApplyThemes()
+        return BaseApplyThemes()

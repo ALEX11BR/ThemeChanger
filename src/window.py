@@ -19,7 +19,7 @@ import shutil
 
 from gi.repository import Gtk, Gdk, GLib
 
-from .applythemes import getThemeApplier
+from .applythemes import getThemeApplier, BaseApplyThemes
 from .installthemes import showArchiveChooserDialog, showErrorDialog, showSuccessDialog, installThemeArchive, checkIconIndexFile, checkKvantumFile
 from .getavailablethemes import getAvailableGtk3Themes, getAvailableIconThemes, getAvailableCursorThemes, getAvailableGtk2Themes, getAvailableGtk4Themes, getAvailableKvantumThemes
 from .searchablethemelist import SearchableThemeList
@@ -28,8 +28,6 @@ from .searchablethemelist import SearchableThemeList
 class ThemechangerWindow(Gtk.ApplicationWindow):
     __gtype_name__ = 'ThemechangerWindow'
     
-    cssPath = os.path.join(GLib.get_user_config_dir(), "gtk-3.0", "gtk.css")
-
     gtkProps = Gtk.Settings.get_default().props
 
     defaultDisplay = Gdk.Display.get_default()
@@ -42,6 +40,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     darkVariantSwitch = Gtk.Template.Child()
     emacsShortcutsSwitch = Gtk.Template.Child()
     overlayScrollbarsSwitch = Gtk.Template.Child()
+    xsettingsInfoBar = Gtk.Template.Child()
     anotherGtk2ThemeBox = Gtk.Template.Child()
     anotherGtk2ThemeSwitch = Gtk.Template.Child()
     anotherGtk4ThemeBox = Gtk.Template.Child()
@@ -111,13 +110,15 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         
         # Now we'll set up the widgets
         try:
-            with open(self.cssPath, "r") as cssFile:
+            with open(os.path.join(GLib.get_user_config_dir(), "gtk-3.0", "gtk.css"), "r") as cssFile:
                 self.cssTextBuffer.set_text(cssFile.read())
         # If the CSS file doesn't exist (or we are unable to access it for reading), we'll set up a nice text placeholder
         except:
             self.cssTextBuffer.set_text("/* Feel free to edit this and see instantaneous results */")
 
         self.themeApplier = getThemeApplier()
+        if type(self.themeApplier) == BaseApplyThemes:
+            self.xsettingsInfoBar.set_visible(False)
 
         self.gtkSearchableThemeList = SearchableThemeList(
             getAvailableGtk3Themes(),
@@ -361,81 +362,16 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.otherOptionsApplyButton.set_sensitive(False)
 
         try:
-            with open(self.cssPath, "w") as cssFile:
-                cssFile.write(self.cssTextBuffer.props.text)
-            with open(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "gtk.css"), "w") as cssFile:
-                cssFile.write(self.cssTextBuffer.props.text)
-
-            if self.gtkProps.gtk_cursor_theme_name:
-                iconKeyFile = GLib.KeyFile()
-                iconKeyFile.set_string("Icon Theme", "Name", "Default")
-                iconKeyFile.set_string("Icon Theme", "Comment", "Default icon theme")
-                iconKeyFile.set_string("Icon Theme", "Inherits", self.gtkProps.gtk_cursor_theme_name)
-                iconKeyFile.save_to_file(os.path.join(GLib.get_home_dir(), ".icons", "default", "index.theme"))
-
-            if self.kvantumThemeBox.get_visible():
-                kvantumKeyFile = GLib.KeyFile()
-                kvantumKeyFile.set_string("General", "theme", self.kvantumThemeName)
-                kvantumKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"))
-                
-            with open(os.path.join(GLib.get_home_dir(), ".gtkrc-2.0"), "w") as gtk2File:
-                gtk2File.write(f'gtk-theme-name="{self.gtk2ThemeName}"\n')
-                gtk2File.write(f'gtk-icon-theme-name="{self.gtkProps.gtk_icon_theme_name}"\n')
-                if self.gtkProps.gtk_cursor_theme_name:
-                    gtk2File.write(f'gtk-cursor-theme-name="{self.gtkProps.gtk_cursor_theme_name}"\n')
-                gtk2File.write(f'gtk-font-name="{self.gtkProps.gtk_font_name}"\n')
-                gtk2File.write(f'gtk-menu-images={int(self.gtkProps.gtk_menu_images)}\n')
-                gtk2File.write(f'gtk-cursor-theme-size={self.gtkProps.gtk_cursor_theme_size}\n')
-                gtk2File.write(f'gtk-button-images={int(self.gtkProps.gtk_button_images)}\n')
-                gtk2File.write(f'gtk-xft-antialias={self.gtkProps.gtk_xft_antialias}\n')
-                gtk2File.write(f'gtk-xft-hinting={self.gtkProps.gtk_xft_hinting}\n')
-                gtk2File.write(f'gtk-xft-hintstyle="{self.gtkProps.gtk_xft_hintstyle}"\n')
-                gtk2File.write(f'gtk-xft-rgba="{self.gtkProps.gtk_xft_rgba}"\n')
-                gtk2File.write(f'gtk-xft-dpi={self.gtkProps.gtk_xft_dpi}\n')
-
-            gtkKeyFile = GLib.KeyFile()
-
-            gtkKeyFile.set_string("Settings", "gtk-theme-name", self.gtk4ThemeName)
-            gtkKeyFile.set_boolean("Settings", "gtk-application-prefer-dark-theme", self.gtkProps.gtk_application_prefer_dark_theme)
-            gtkKeyFile.set_string("Settings", "gtk-icon-theme-name", self.gtkProps.gtk_icon_theme_name)
-            if self.gtkProps.gtk_cursor_theme_name:
-                gtkKeyFile.set_string("Settings", "gtk-cursor-theme-name", self.gtkProps.gtk_cursor_theme_name)
-            gtkKeyFile.set_integer("Settings", "gtk-cursor-theme-size", self.gtkProps.gtk_cursor_theme_size)
-            gtkKeyFile.set_string("Settings", "gtk-font-name", self.gtkProps.gtk_font_name)
-            gtkKeyFile.set_integer("Settings", "gtk-xft-antialias", self.gtkProps.gtk_xft_antialias)
-            gtkKeyFile.set_integer("Settings", "gtk-xft-hinting", self.gtkProps.gtk_xft_hinting)
-            gtkKeyFile.set_string("Settings", "gtk-xft-hintstyle", self.gtkProps.gtk_xft_hintstyle or "hintnone")
-            gtkKeyFile.set_string("Settings", "gtk-xft-rgba", self.gtkProps.gtk_xft_rgba or "none")
-            gtkKeyFile.set_integer("Settings", "gtk-xft-dpi", self.gtkProps.gtk_xft_dpi)
-            gtkKeyFile.set_boolean("Settings", "gtk-overlay-scrolling", self.gtkProps.gtk_overlay_scrolling)
-
-            gtkKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "settings.ini"))
-
-            gtkKeyFile.set_string("Settings", "gtk-theme-name", self.gtkProps.gtk_theme_name)
-            if self.gtkProps.gtk_key_theme_name:
-                gtkKeyFile.set_string("Settings", "gtk-key-theme-name", self.gtkProps.gtk_key_theme_name)
-            gtkKeyFile.set_boolean("Settings", "gtk-menu-images", self.gtkProps.gtk_menu_images)
-            gtkKeyFile.set_boolean("Settings", "gtk-button-images", self.gtkProps.gtk_button_images)
-
-            gtkKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "gtk-3.0", "settings.ini"))
+            self.themeApplier.applyThemes(
+                props=self.gtkProps,
+                gtk2Theme=self.gtk2ThemeName,
+                gtk4Theme=self.gtk4ThemeName,
+                kvantumTheme=self.kvantumThemeName,
+                cssText=self.cssTextBuffer.props.text
+            )
         except Exception as err:
             showErrorDialog("Error: Could not apply settings", str(err))
             self.onSettingChanged()
-        else:
-            self.themeApplier.applyThemes(
-                gtkTheme = self.gtkProps.gtk_theme_name,
-                iconTheme = self.gtkProps.gtk_icon_theme_name,
-                cursorTheme = self.gtkProps.gtk_cursor_theme_name or "default",
-                keyTheme = self.gtkProps.gtk_key_theme_name or '',
-                menuImages = self.gtkProps.gtk_menu_images,
-                buttonImages = self.gtkProps.gtk_button_images,
-                fontName = self.gtkProps.gtk_font_name,
-                antialias = self.gtkProps.gtk_xft_antialias,
-                hinting = self.gtkProps.gtk_xft_hinting,
-                hintstyle = self.gtkProps.gtk_xft_hintstyle or "hintnone",
-                rgba = self.gtkProps.gtk_xft_rgba or "none",
-                dpi = self.gtkProps.gtk_xft_dpi,
-            )
 
     def installArchive(self, kind, section, destination, anchorFile, anchorLevels, lookupFunction):
         archivePath = showArchiveChooserDialog(f'Select the {kind} theme archive file')
