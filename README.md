@@ -11,7 +11,7 @@ It also lets the user install icon and widget theme archives.
 - Set the cursor theme, and tweak the cursor's size
 - Set all these themes with a special searchable selector with previews for GTK3, icon and cursor themes
 - Set various options like whether buttons have images or not
-- Instantaneously apply your setting changes to the running applications using [xsettingsd](https://github.com/derat/xsettingsd) (you must download xsettingsd and run it in the background)
+- Instantaneously apply your setting changes to the running applications in GNOME, Cinnamon, or using [xsettingsd](https://github.com/derat/xsettingsd) (you must download xsettingsd and run it in the background) for those that don't use GTK desktop environments
 - Edit GTK CSS with instantaneous feedback of the changes made
 - Install new widget or icon themes from archives available e.g. at https://gnome-look.org
 
@@ -32,7 +32,7 @@ In the folder with the source (obtainable e.g. by running `git clone https://git
 
 # TODOs
 - Add more advanced Kvantum support (e.g. handling of the Kvantum theme names, which oftentimes don't match the GTK theme names, or syncing some options)
-- Implement live reloading for other XSETTINGS-compatible daemons.
+- Implement live reloading for other desktop environments / XSETTINGS-compatible daemons.
 - Add more options to set (see [further reference](https://developer.gnome.org/gtk3/stable/GtkSettings.html))
 - Add theme remover
 - Add a client for OCS-compatible websites like gnome-look.org, tailored for downloading (and automatically installing) themes (see [API reference]() and [a reference project](https://www.opencode.net/dfn2/pling-store-development))

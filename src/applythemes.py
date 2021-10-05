@@ -17,7 +17,7 @@
 import os
 import subprocess
 
-from gi.repository import GLib
+from gi.repository import GLib, Gio
 
 class BaseApplyThemes:
     def applyThemes(self, props, gtk2Theme, gtk4Theme, kvantumTheme, cssText):
@@ -79,7 +79,53 @@ class BaseApplyThemes:
         with open(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "gtk.css"), "w") as cssFile:
             cssFile.write(cssText)
 
+class GSettingsApplyThemes(BaseApplyThemes):
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+
+        self.settings.set_string("gtk-theme", props.gtk_theme_name)
+        self.settings.set_string("icon-theme", props.gtk_icon_theme_name)
+        self.settings.set_string("cursor-theme", props.gtk_cursor_theme_name or "")
+        self.settings.set_int("cursor-size", props.gtk_cursor_theme_size)
+        self.settings.set_string("gtk-key-theme", props.gtk_key_theme_name or "")
+        self.settings.set_string("font-name", props.gtk_font_name)
+        self.settings.set_double("text-scaling-factor", props.gtk_xft_dpi/(96*1024))
         
+class GnomeApplyThemes(GSettingsApplyThemes):
+    def __init__(self):
+        self.settings = Gio.Settings.new("org.gnome.desktop.interface")
+    
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+
+        if props.gtk_xft_rgba != "none":
+            self.settings.set_string("font-rgba-order", props.gtk_xft_rgba or "rgb")
+            self.settings.set_string("font-antialiasing", "rgba" if props.gtk_xft_antialias else "none")
+        else:
+            self.settings.set_string("font-antialiasing", "grayscale" if props.gtk_xft_antialias else "none")
+        self.settings.set_string("font-hinting", props.gtk_xft_hintstyle[4:]) # drop the first 4 letters ('hint' in all cases)
+
+        self.settings.set_boolean("overlay-scrolling", props.gtk_overlay_scrolling)
+
+class CinnamonApplyThemes(GSettingsApplyThemes):
+    def __init__(self):
+        self.settings = Gio.Settings.new("org.cinnamon.desktop.interface")
+        self.settingsFont = Gio.Settings.new("org.cinnamon.settings-daemon.plugins.xsettings")
+
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+
+        if props.gtk_xft_rgba != "none":
+            self.settingsFont.set_string("rgba-order", props.gtk_xft_rgba)
+            self.settingsFont.set_string("antialiasing", "rgba" if props.gtk_xft_antialias else "none")
+        else:
+            self.settingsFont.set_string("antialiasing", "grayscale" if props.gtk_xft_antialias else "none")
+        self.settingsFont.set_string("hinting", props.gtk_xft_hintstyle[4:]) # drop the first 4 letters ('hint' in all cases)
+
+        self.settings.set_boolean("gtk-overlay-scrollbars", props.gtk_overlay_scrolling)
+        self.settings.set_boolean("buttons-have-icons", props.gtk_button_images)
+        self.settings.set_boolean("menus-have-icons", props.gtk_menu_images)
+
 class XsettingsdApplyThemes(BaseApplyThemes):
     def __init__(self):
         self.confFolder = os.path.join(GLib.get_user_config_dir(), "xsettingsd")
@@ -100,9 +146,10 @@ class XsettingsdApplyThemes(BaseApplyThemes):
             "Xft/HintStyle": f'"{props.gtk_xft_hintstyle or "hintnone"}"',
             "Xft/RGBA": f'"{props.gtk_xft_rgba or "none"}"',
             "Xft/DPI": props.gtk_xft_dpi,
-            "Gtk/CursorThemeName": f'"{props.gtk_cursor_theme_name or "default"}"',
+            "Gtk/CursorThemeName": f'"{props.gtk_cursor_theme_name or ""}"',
             "Gtk/FontName": f'"{props.gtk_font_name}"',
             "Gtk/KeyThemeName": f'"{props.gtk_key_theme_name or ""}"',
+            "Gtk/OverlayScrolling": int(props.gtk_overlay_scrolling),
             "Gtk/MenuImages": int(props.gtk_menu_images),
             "Gtk/ButtonImages": int(props.gtk_button_images),
         }
@@ -113,8 +160,15 @@ class XsettingsdApplyThemes(BaseApplyThemes):
         
         subprocess.run(["pkill", "-HUP", "^xsettingsd$"])
 
+def isRunning(app):
+    return subprocess.call(["pidof", app], stdout=subprocess.DEVNULL) == 0
+
 def getThemeApplier():
-    if subprocess.call(["pidof", "xsettingsd"], stdout=subprocess.DEVNULL) == 0:
+    if isRunning("gsd-xsettings"):
+        return GnomeApplyThemes()
+    elif isRunning("csd-xsettings"):
+        return CinnamonApplyThemes()
+    elif isRunning("xsettingsd"):
         return XsettingsdApplyThemes()
     else:
         return BaseApplyThemes()
