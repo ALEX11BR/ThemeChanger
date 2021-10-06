@@ -928,7 +928,7 @@
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
                     <property name="relief">none</property>
-                    <property name="uri">https://developer.gnome.org/gtk3/stable/chap-css-overview.html</property>
+                    <property name="uri">https://docs.gtk.org/gtk3/css-overview.html</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
