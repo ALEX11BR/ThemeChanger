@@ -15,6 +15,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
+from pathlib import Path
 from gi.repository import Gtk, GLib, GdkPixbuf
 
 from .pixbuffromxcursor import pixbufFromXCursor
@@ -38,8 +39,7 @@ def getAvailableGtk3Themes():
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "themes"),
         os.path.join(GLib.get_home_dir(), ".themes"),
-        "/usr/share/themes"
-    ]
+    ] + [os.path.join(dataDir, "themes") for dataDir in GLib.get_system_data_dirs()]
     for lookupPath in lookupPaths:
         try:
             for f in os.listdir(lookupPath):
@@ -63,8 +63,7 @@ def getAvailableIconThemes():
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "icons"),
         os.path.join(GLib.get_home_dir(), ".icons"),
-        "/usr/share/icons"
-    ]
+    ] + [os.path.join(dataDir, "icons") for dataDir in GLib.get_system_data_dirs()]
     for lookupPath in lookupPaths:
         try:
             for f in os.listdir(lookupPath):
@@ -102,8 +101,7 @@ def getAvailableCursorThemes():
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "icons"),
         os.path.join(GLib.get_home_dir(), ".icons"),
-        "/usr/share/icons"
-    ]
+    ] + [os.path.join(dataDir, "icons") for dataDir in GLib.get_system_data_dirs()]
     for lookupPath in lookupPaths:
         try:
             for f in os.listdir(lookupPath):
@@ -135,8 +133,7 @@ def getAvailableGtk4Themes():
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "themes"),
         os.path.join(GLib.get_home_dir(), ".themes"),
-        "/usr/share/themes"
-    ]
+    ] + [os.path.join(dataDir, "themes") for dataDir in GLib.get_system_data_dirs()]
     for lookupPath in lookupPaths:
         try:
             for f in os.listdir(lookupPath):
@@ -152,8 +149,7 @@ def getAvailableGtk2Themes():
     lookupPaths = [
         os.path.join(GLib.get_user_data_dir(), "themes"),
         os.path.join(GLib.get_home_dir(), ".themes"),
-        "/usr/share/themes"
-    ]
+    ] + [os.path.join(dataDir, "themes") for dataDir in GLib.get_system_data_dirs()]
     for lookupPath in lookupPaths:
         try:
             for f in os.listdir(lookupPath):
@@ -163,13 +159,13 @@ def getAvailableGtk2Themes():
             pass
     return uniquifySortedListStore(availableThemes)
 
-def getAvailableKvantumThemes():
+def getAvailableKvantumThemes(kvantumPath):
     availableThemes = Gtk.ListStore(str, str)
     availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
     availableThemes.append(["Kvantum", "default"])
     lookupPaths = [
         os.path.join(GLib.get_user_config_dir(), "Kvantum"),
-        "/usr/share/Kvantum"
+        os.path.join(Path(kvantumPath).parent.parent, "share", "Kvantum")
     ]
     for lookupPath in lookupPaths:
         try:

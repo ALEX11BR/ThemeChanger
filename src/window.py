@@ -177,7 +177,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.anotherGtk4ThemeSwitch.set_active(hasAnotherGtk4Theme)
         self.gtk4SearchableThemeList.set_visible(hasAnotherGtk4Theme)
 
-        if shutil.which("kvantummanager"):
+        kvantumPath = shutil.which("kvantummanager")
+        if kvantumPath:
             try:
                 kvantumKeyFile = GLib.KeyFile()
                 kvantumKeyFile.load_from_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"), GLib.KeyFileFlags.NONE)
@@ -186,7 +187,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
                 self.kvantumThemeName = self.gtkProps.gtk_theme_name
             hasAnotherKvantumTheme = self.gtkProps.gtk_theme_name != self.kvantumThemeName
             self.kvantumSearchableThemeList = SearchableThemeList(
-                getAvailableKvantumThemes(),
+                getAvailableKvantumThemes(kvantumPath),
                 self.kvantumThemeName,
                 self.onKvantumThemeChanged
             )

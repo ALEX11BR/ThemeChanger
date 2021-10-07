@@ -18,7 +18,7 @@ conf.set('localedir', join_paths(get_option('prefix'), get_option('localedir')))
 conf.set('pkgdatadir', pkgdatadir)
 conf.set('gtkversion', '3.0')
 
-pythondep = python.dependency(version: '>= 3.5')
+pythondep = python.dependency(version: '>= 3.6')
 pygobjectdep = dependency('pygobject-3.0')
 xcursordep = dependency('xcursor')
 gdkpixbufdep = dependency('gdk-pixbuf-2.0')
