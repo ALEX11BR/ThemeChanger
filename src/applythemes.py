@@ -204,9 +204,9 @@ def getThemeApplier():
         return GnomeApplyThemes()
     elif isRunning("csd-xsettings"):
         return CinnamonApplyThemes()
+    elif isRunning("xfsettingsd"):
+        return XfconfApplyThemes()
     elif isRunning("xsettingsd"):
         return XsettingsdApplyThemes()
-    elif isRunning("xfconfd"):
-        return XfconfApplyThemes()
     else:
         return BaseApplyThemes()
