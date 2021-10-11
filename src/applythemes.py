@@ -126,7 +126,52 @@ class CinnamonApplyThemes(GSettingsApplyThemes):
         self.settings.set_boolean("buttons-have-icons", props.gtk_button_images)
         self.settings.set_boolean("menus-have-icons", props.gtk_menu_images)
 
-class XsettingsdApplyThemes(BaseApplyThemes):
+class XApplyThemes(BaseApplyThemes):
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+        # Here we have common options for xfconf and xsettingsd
+        self.options = {
+            "Net/ThemeName": props.gtk_theme_name,
+            "Net/IconThemeName": props.gtk_icon_theme_name,
+            "Xft/Antialias": props.gtk_xft_antialias,
+            "Xft/Hinting": props.gtk_xft_hinting,
+            "Xft/HintStyle": props.gtk_xft_hintstyle or "hintnone",
+            "Xft/RGBA": props.gtk_xft_rgba or "none",
+            "Xft/DPI": props.gtk_xft_dpi,
+            "Gtk/CursorThemeName": props.gtk_cursor_theme_name or "",
+            "Gtk/FontName": props.gtk_font_name,
+            "Gtk/KeyThemeName": props.gtk_key_theme_name or "",
+            "Gtk/OverlayScrolling": props.gtk_overlay_scrolling,
+            "Gtk/MenuImages": props.gtk_menu_images,
+            "Gtk/ButtonImages": props.gtk_button_images,
+        }
+
+class XfconfApplyThemes(XApplyThemes):
+    def setOption(self, option, value):
+        subprocess.run([
+            "xfconf-query", "-c", "xsettings",
+            "-p", option,
+            "-s", value
+        ])
+
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+
+        for option in self.options:
+            value = self.options[option]
+            
+            if option == "Xft/DPI":
+                value = int(value/1024)
+            if type(value) is int:
+                value = str(value)
+            elif value == True:
+                value = "true"
+            elif value == False:
+                value = "false"
+
+            self.setOption("/"+option, value)
+
+class XsettingsdApplyThemes(XApplyThemes):
     def __init__(self):
         self.confFolder = os.path.join(GLib.get_user_config_dir(), "xsettingsd")
         try:
@@ -138,25 +183,16 @@ class XsettingsdApplyThemes(BaseApplyThemes):
     def applyThemes(self, props, **kwargs):
         super().applyThemes(props, **kwargs)
 
-        options = {
-            "Net/ThemeName": f'"{props.gtk_theme_name}"',
-            "Net/IconThemeName": f'"{props.gtk_icon_theme_name}"',
-            "Xft/Antialias": props.gtk_xft_antialias,
-            "Xft/Hinting": props.gtk_xft_hinting,
-            "Xft/HintStyle": f'"{props.gtk_xft_hintstyle or "hintnone"}"',
-            "Xft/RGBA": f'"{props.gtk_xft_rgba or "none"}"',
-            "Xft/DPI": props.gtk_xft_dpi,
-            "Gtk/CursorThemeName": f'"{props.gtk_cursor_theme_name or ""}"',
-            "Gtk/FontName": f'"{props.gtk_font_name}"',
-            "Gtk/KeyThemeName": f'"{props.gtk_key_theme_name or ""}"',
-            "Gtk/OverlayScrolling": int(props.gtk_overlay_scrolling),
-            "Gtk/MenuImages": int(props.gtk_menu_images),
-            "Gtk/ButtonImages": int(props.gtk_button_images),
-        }
-
         with open(self.confFile, "w") as file:
-            for option in options:
-                file.write(f'{option} {options[option]}\n')
+            for option in self.options:
+                value = self.options[option]
+                
+                if type(value) is str:
+                    value = f'"{value}"'
+                elif type(value) is bool:
+                    value = int(value)
+                
+                file.write(f'{option} {value}\n')
         
         subprocess.run(["pkill", "-HUP", "^xsettingsd$"])
 
@@ -170,5 +206,7 @@ def getThemeApplier():
         return CinnamonApplyThemes()
     elif isRunning("xsettingsd"):
         return XsettingsdApplyThemes()
+    elif isRunning("xfconfd"):
+        return XfconfApplyThemes()
     else:
         return BaseApplyThemes()
