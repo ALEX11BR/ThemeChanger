@@ -129,7 +129,7 @@ class CinnamonApplyThemes(GSettingsApplyThemes):
 class XApplyThemes(BaseApplyThemes):
     def applyThemes(self, props, **kwargs):
         super().applyThemes(props, **kwargs)
-        # Here we have common options for xfconf and xsettingsd
+        # Here we have common options for XFCE xfsettingsd, xsettingsd, even LXDE lxsession
         self.options = {
             "Net/ThemeName": props.gtk_theme_name,
             "Net/IconThemeName": props.gtk_icon_theme_name,
@@ -145,6 +145,34 @@ class XApplyThemes(BaseApplyThemes):
             "Gtk/MenuImages": props.gtk_menu_images,
             "Gtk/ButtonImages": props.gtk_button_images,
         }
+
+class LXSessionApplyThemes(XApplyThemes):
+    def __init__(self):
+        self.lxsessionConfigPath = os.path.join(
+            GLib.get_user_config_dir(),
+            "lxsession",
+            "LXDE",
+            "desktop.conf"
+        )
+
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+        
+        lxsessionKeyFile = GLib.KeyFile()
+        try:
+            lxsessionKeyFile.load_from_file(self.lxsessionConfigPath)
+        except:
+            pass
+
+        for option in self.options:
+            value = self.options[option]
+            
+            if type(value) is str:
+                lxsessionKeyFile.set_string("GTK", "s"+option, value)
+            else:
+                lxsessionKeyFile.set_integer("GTK", "i"+option, int(value))
+        
+        lxsessionKeyFile.save_to_file(self.lxsessionConfigPath)
 
 class XfconfApplyThemes(XApplyThemes):
     def setOption(self, option, value):
@@ -206,6 +234,8 @@ def getThemeApplier():
         return CinnamonApplyThemes()
     elif isRunning("xfsettingsd"):
         return XfconfApplyThemes()
+    elif isRunning("lxsession"):
+        return LXSessionApplyThemes()
     elif isRunning("xsettingsd"):
         return XsettingsdApplyThemes()
     else:
