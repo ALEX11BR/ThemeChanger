@@ -21,6 +21,12 @@ Install the `themechanger-git` package from the AUR the way you like it. For ins
 ```
 yay -S themechanger-git
 ```
+## Nix(OS)
+Install the `themechanger` package from nixpkgs, like this:
+```
+nix-env -iA nixos.themechanger # On NixOS
+nix-env -iA nixpkgs.themechanger # On any other platform
+```
 ## From source
 Make sure you have installed PyGobject, Gtk3, GLib (for the app running); headers thereof, meson, ninja (for the installation process). For reference, this is how you get the required dependencies on Ubuntu:
 ```
