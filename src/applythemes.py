@@ -159,10 +159,7 @@ class LXSessionApplyThemes(XApplyThemes):
         super().applyThemes(props, **kwargs)
         
         lxsessionKeyFile = GLib.KeyFile()
-        try:
-            lxsessionKeyFile.load_from_file(self.lxsessionConfigPath)
-        except:
-            pass
+        lxsessionKeyFile.load_from_file(self.lxsessionConfigPath, GLib.KeyFileFlags.NONE)
 
         for option in self.options:
             value = self.options[option]
