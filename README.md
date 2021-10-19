@@ -11,7 +11,7 @@ It also lets the user install icon and widget theme archives.
 - Set the cursor theme, and tweak the cursor's size
 - Set all these themes with a special searchable selector with previews for GTK3, icon and cursor themes
 - Set various options like whether buttons have images or not
-- Instantaneously apply your setting changes to the running applications in GNOME, Cinnamon, XFCE, LXDE using lxsession, or using [xsettingsd](https://github.com/derat/xsettingsd) (you must download xsettingsd and run it in the background) for those that don't use GTK desktop environments
+- Instantaneously apply your setting changes to the running applications in GNOME, Cinnamon, Mate, XFCE, LXDE using lxsession, or using [xsettingsd](https://github.com/derat/xsettingsd) (you must download xsettingsd and run it in the background) for those that don't use GTK desktop environments
 - Edit GTK CSS with instantaneous feedback of the changes made
 - Install new widget or icon themes from archives available e.g. at https://gnome-look.org
 
