@@ -20,6 +20,9 @@ import subprocess
 from gi.repository import GLib, Gio
 
 class BaseApplyThemes:
+    """
+    The base theme applying mechanism: write themes and settings to config files
+    """
     def applyThemes(self, props, gtk2Theme, gtk4Theme, kvantumTheme, cssText):
         gtkKeyFile = GLib.KeyFile()
 
@@ -80,18 +83,61 @@ class BaseApplyThemes:
             cssFile.write(cssText)
 
 class GSettingsApplyThemes(BaseApplyThemes):
+    """
+    Common live reloadable theme setting code for GSettings-based DE's i.e. Gnome, Cinnamon, Mate.
+
+    self.settings gets defined by the derived classes tailored for each DE.
+    """
     def applyThemes(self, props, **kwargs):
         super().applyThemes(props, **kwargs)
 
         self.settings.set_string("gtk-theme", props.gtk_theme_name)
         self.settings.set_string("icon-theme", props.gtk_icon_theme_name)
-        self.settings.set_string("cursor-theme", props.gtk_cursor_theme_name or "")
-        self.settings.set_int("cursor-size", props.gtk_cursor_theme_size)
         self.settings.set_string("gtk-key-theme", props.gtk_key_theme_name or "")
         self.settings.set_string("font-name", props.gtk_font_name)
-        self.settings.set_double("text-scaling-factor", props.gtk_xft_dpi/(96*1024))
         
-class GnomeApplyThemes(GSettingsApplyThemes):
+class MateApplyThemes(GSettingsApplyThemes):
+    """
+    Live reloadable theme & options setting code specific to Mate.
+    """
+    def __init__(self):
+        self.settings = Gio.Settings.new("org.mate.interface")
+        self.settingsCursor = Gio.Settings.new("org.mate.peripherals-mouse")
+        self.settingsFont = Gio.Settings.new("org.mate.font-rendering")
+
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+
+        self.settingsCursor.set_string("cursor-theme", props.gtk_cursor_theme_name or "")
+        self.settingsCursor.set_int("cursor-size", props.gtk_cursor_theme_size)
+        self.settingsFont.set_double("dpi", props.gtk_xft_dpi/1024)
+
+        if props.gtk_xft_rgba != "none":
+            self.settingsFont.set_string("rgba-order", props.gtk_xft_rgba)
+            self.settingsFont.set_string("antialiasing", "rgba" if props.gtk_xft_antialias else "none")
+        else:
+            self.settingsFont.set_string("antialiasing", "grayscale" if props.gtk_xft_antialias else "none")
+        self.settingsFont.set_string("hinting", props.gtk_xft_hintstyle[4:]) # drop the first 4 letters ('hint' in all cases)
+        
+        self.settings.set_boolean("gtk-overlay-scrolling", props.gtk_overlay_scrolling)
+        self.settings.set_boolean("buttons-have-icons", props.gtk_button_images)
+        self.settings.set_boolean("menus-have-icons", props.gtk_menu_images)
+
+class CinnGnomeApplyThemes(GSettingsApplyThemes):
+    """
+    Common live reloadable theme setting code for Gnome & Cinnamon.
+    """
+    def applyThemes(self, props, **kwargs):
+        super().applyThemes(props, **kwargs)
+
+        self.settings.set_string("cursor-theme", props.gtk_cursor_theme_name or "")
+        self.settings.set_int("cursor-size", props.gtk_cursor_theme_size)
+        self.settings.set_double("text-scaling-factor", props.gtk_xft_dpi/(96*1024))
+
+class GnomeApplyThemes(CinnGnomeApplyThemes):
+    """
+    Live reloadable theme & options setting code specific to Cinnamon.
+    """
     def __init__(self):
         self.settings = Gio.Settings.new("org.gnome.desktop.interface")
     
@@ -107,7 +153,10 @@ class GnomeApplyThemes(GSettingsApplyThemes):
 
         self.settings.set_boolean("overlay-scrolling", props.gtk_overlay_scrolling)
 
-class CinnamonApplyThemes(GSettingsApplyThemes):
+class CinnamonApplyThemes(CinnGnomeApplyThemes):
+    """
+    Live reloadable theme & options setting code specific to Gnome.
+    """
     def __init__(self):
         self.settings = Gio.Settings.new("org.cinnamon.desktop.interface")
         self.settingsFont = Gio.Settings.new("org.cinnamon.settings-daemon.plugins.xsettings")
@@ -127,9 +176,14 @@ class CinnamonApplyThemes(GSettingsApplyThemes):
         self.settings.set_boolean("menus-have-icons", props.gtk_menu_images)
 
 class XApplyThemes(BaseApplyThemes):
+    """
+    Common live reloadable theme setting code for mechanisms which use the XSETTINGS property names.
+    They all have an 'X' somewhere, too.
+
+    self.settings gets defined by the derived classes tailored for each mechanism.
+    """
     def applyThemes(self, props, **kwargs):
         super().applyThemes(props, **kwargs)
-        # Here we have common options for XFCE xfsettingsd, xsettingsd, even LXDE lxsession
         self.options = {
             "Net/ThemeName": props.gtk_theme_name,
             "Net/IconThemeName": props.gtk_icon_theme_name,
@@ -147,6 +201,9 @@ class XApplyThemes(BaseApplyThemes):
         }
 
 class LXSessionApplyThemes(XApplyThemes):
+    """
+    Live reloadable theme & options setting code specific to LXSession @ LXDE.
+    """
     def __init__(self):
         self.lxsessionConfigPath = os.path.join(
             GLib.get_user_config_dir(),
@@ -172,6 +229,9 @@ class LXSessionApplyThemes(XApplyThemes):
         lxsessionKeyFile.save_to_file(self.lxsessionConfigPath)
 
 class XfconfApplyThemes(XApplyThemes):
+    """
+    Live reloadable theme & options setting code specific to Xfconf @ XFCE.
+    """
     def setOption(self, option, value):
         subprocess.run([
             "xfconf-query", "-c", "xsettings",
@@ -197,6 +257,9 @@ class XfconfApplyThemes(XApplyThemes):
             self.setOption("/"+option, value)
 
 class XsettingsdApplyThemes(XApplyThemes):
+    """
+    Live reloadable theme & options setting code specific to xsettingsd.
+    """
     def __init__(self):
         self.confFolder = os.path.join(GLib.get_user_config_dir(), "xsettingsd")
         try:
@@ -229,6 +292,8 @@ def getThemeApplier():
         return GnomeApplyThemes()
     elif isRunning("csd-xsettings"):
         return CinnamonApplyThemes()
+    elif isRunning("mate-settings-daemon"):
+        return MateApplyThemes()
     elif isRunning("xfsettingsd"):
         return XfconfApplyThemes()
     elif isRunning("lxsession"):
