@@ -28,6 +28,15 @@ def uniquifySortedListStore(listStore):
         prev = row
     return listStore
 
+"""
+The functions below create Gtk.ListStore's that store themes
+for use in SearchableThemeList's and have the following columns:
+1. A str column which holds the display name of the theme
+2. A str column which holds the underlying theme name
+3. (Optional, depends on which kind of themes are used)
+   A GdkPixbuf.Pixbuf column which holds the theme's preview image
+"""
+
 def getAvailableGtk3Themes():
     availableThemes = Gtk.ListStore(str, str, GdkPixbuf.Pixbuf)
     availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
@@ -46,6 +55,8 @@ def getAvailableGtk3Themes():
                 if f != "Adwaita" and os.path.isfile(os.path.join(lookupPath, f, "gtk-3.0", "gtk.css")):
                     thumbnailFile = os.path.join(lookupPath, f, "gtk-3.0", "thumbnail.png")
                     availableThemes.append([
+                        # we add a space to the beginning of the display name
+                        # to create spacing between the theme preview image and the theme name text
                         " "+f, f,
                         GdkPixbuf.Pixbuf.new_from_file_at_size(
                             thumbnailFile, 120, 35

@@ -419,6 +419,14 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
 
     @Gtk.Template.Callback()
     def onSettingChanged(self, *args):
+        """
+        Whenever an option is changed, this function is called,
+        either being defined as one of the callback functions from the 'window.ui' file,
+        either as the callback function of SearchableThemeList's.
+        
+        Its goal is to enable the 'Apply' button(s),
+        that get disabled whenever the settings are applied.
+        """
         self.gtkThemesApplyButton.set_sensitive(True)
         self.iconThemesApplyButton.set_sensitive(True)
         self.cursorThemesApplyButton.set_sensitive(True)
