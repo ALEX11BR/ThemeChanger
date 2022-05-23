@@ -37,7 +37,6 @@ sudo apt install meson gcc libglib2.0-dev-bin python3-dev python-gi-dev libxcurs
 In the folder with the source (obtainable e.g. by running `git clone https://github.com/ALEX11BR/ThemeChanger`) run `meson build`, then `ninja -C build install`, and you're ready to go!
 
 # TODOs
-- Add more advanced Kvantum support (e.g. handling of the Kvantum theme names, which oftentimes don't match the GTK theme names, or syncing some options)
 - Add more options to set (see [further reference](https://developer.gnome.org/gtk3/stable/GtkSettings.html))
 - Add theme remover
 - Add a client for OCS-compatible websites like gnome-look.org, tailored for downloading (and automatically installing) themes (see [API reference](https://freedesktop.org/wiki/Specifications/open-collaboration-services/) and [a reference project](https://www.opencode.net/dfn2/pling-store-development))
