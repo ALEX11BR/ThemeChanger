@@ -184,9 +184,10 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
                 kvantumKeyFile.load_from_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"), GLib.KeyFileFlags.NONE)
                 self.kvantumThemeName = kvantumKeyFile.get_string("General", "theme")
                 if self.kvantumThemeName[-1] == "#":
+                    # drop the last character i.e. '#', the 'changed theme' modifier
                     self.kvantumThemeName = self.kvantumThemeName[:-1]
             except:
-                self.kvantumThemeName = self.gtkProps.gtk_theme_name
+                self.kvantumThemeName = "Default"
             hasAnotherKvantumTheme = self.gtkProps.gtk_theme_name != self.kvantumThemeName
             self.kvantumThemeFilePath = "//notset"
             # When we run the constructor for the kvantumSearchableThemeList,
