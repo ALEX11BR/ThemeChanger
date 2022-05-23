@@ -124,7 +124,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             getAvailableGtk3Themes(),
             self.gtkProps.gtk_theme_name,
             self.onGtkThemeChanged,
-            True
+            hasPixbuf=True
         )
         self.gtkThemesBox.pack_start(self.gtkSearchableThemeList, True, True, 0)
 
@@ -132,7 +132,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             getAvailableIconThemes(),
             self.gtkProps.gtk_icon_theme_name,
             self.onIconThemeChanged,
-            True
+            hasPixbuf=True
         )
         self.iconThemesBox.pack_start(self.iconSearchableThemeList, True, True, 0)
 
@@ -140,7 +140,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             getAvailableCursorThemes(),
             self.gtkProps.gtk_cursor_theme_name or "default",
             self.onCursorThemeChanged,
-            True
+            hasPixbuf=True
         )
         self.cursorThemesBox.pack_start(self.cursorSearchableThemeList, True, True, 0)
 
@@ -183,13 +183,21 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
                 kvantumKeyFile = GLib.KeyFile()
                 kvantumKeyFile.load_from_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"), GLib.KeyFileFlags.NONE)
                 self.kvantumThemeName = kvantumKeyFile.get_string("General", "theme")
+                if self.kvantumThemeName[-1] == "#":
+                    self.kvantumThemeName = self.kvantumThemeName[:-1]
             except:
                 self.kvantumThemeName = self.gtkProps.gtk_theme_name
             hasAnotherKvantumTheme = self.gtkProps.gtk_theme_name != self.kvantumThemeName
+            self.kvantumThemeFilePath = "//notset"
+            # When we run the constructor for the kvantumSearchableThemeList,
+            # its TreeSelection's selected item will be set to the one matching the kvantumThemeName
+            # thus triggering the 'changed' signal's function, which then calls the callback
+            # with the 2 params of the selected item, thus properly setting the kvantumThemeName.
             self.kvantumSearchableThemeList = SearchableThemeList(
                 getAvailableKvantumThemes(kvantumPath),
                 self.kvantumThemeName,
-                self.onKvantumThemeChanged
+                self.onKvantumThemeChanged,
+                hasThemeFilePath=True
             )
             self.kvantumThemeBox.pack_start(self.kvantumSearchableThemeList, True, True, 0)
             self.anotherKvantumThemeSwitch.set_active(hasAnotherKvantumTheme)
@@ -266,9 +274,10 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.onSettingChanged()
         self.gtk4ThemeName = themename
 
-    def onKvantumThemeChanged(self, themename):
+    def onKvantumThemeChanged(self, themename, themepath):
         self.onSettingChanged()
         self.kvantumThemeName = themename
+        self.kvantumThemeFilePath = themepath
 
     @Gtk.Template.Callback()
     def darkVariantSwitchStateSet(self, switch, state):
@@ -368,6 +377,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
                 gtk2Theme=self.gtk2ThemeName,
                 gtk4Theme=self.gtk4ThemeName,
                 kvantumTheme=self.kvantumThemeName,
+                kvantumThemeFilePath=self.kvantumThemeFilePath,
                 cssText=self.cssTextBuffer.props.text
             )
         except Exception as err:

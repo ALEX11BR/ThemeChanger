@@ -25,11 +25,12 @@ class SearchableThemeList(Gtk.Bin):
     themesTreeView = Gtk.Template.Child()
     themesTreeViewSelection = Gtk.Template.Child()
 
-    def __init__(self, themesTreeViewModel, selectedTheme, onThemeSelectedCallback, hasPixbuf=False, *args):
+    def __init__(self, themesTreeViewModel, selectedTheme, onThemeSelectedCallback, hasThemeFilePath=False, hasPixbuf=False, *args):
         Gtk.Bin.__init__(self, *args)
 
         self.selectedTheme = selectedTheme
         self.onThemeSelectedCallback = onThemeSelectedCallback
+        self.hasThemeFilePath = hasThemeFilePath
         self.setThemesTreeViewModel(themesTreeViewModel)
 
         themeColumn = Gtk.TreeViewColumn("Theme")
@@ -82,7 +83,10 @@ class SearchableThemeList(Gtk.Bin):
         if not treeiter:
             return
         self.selectedTheme = model[treeiter][1]
-        self.onThemeSelectedCallback(self.selectedTheme)
+        if self.hasThemeFilePath:
+            self.onThemeSelectedCallback(self.selectedTheme, model[treeiter][2])
+        else:
+            self.onThemeSelectedCallback(self.selectedTheme)
 
     @Gtk.Template.Callback()
     def onChangeFilter(self, searchentry):

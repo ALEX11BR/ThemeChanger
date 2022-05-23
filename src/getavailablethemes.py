@@ -34,7 +34,8 @@ for use in SearchableThemeList's and have the following columns:
 1. A str column which holds the display name of the theme
 2. A str column which holds the underlying theme name
 3. (Optional, depends on which kind of themes are used)
-   A GdkPixbuf.Pixbuf column which holds the theme's preview image
+ a) A GdkPixbuf.Pixbuf column which holds the theme's preview image
+ b) A str column which holds the theme file path (for Kvantum)
 """
 
 def getAvailableGtk3Themes():
@@ -171,9 +172,13 @@ def getAvailableGtk2Themes():
     return uniquifySortedListStore(availableThemes)
 
 def getAvailableKvantumThemes(kvantumPath):
-    availableThemes = Gtk.ListStore(str, str)
+    availableThemes = Gtk.ListStore(str, str, str)
     availableThemes.set_sort_column_id(0, Gtk.SortType.ASCENDING)
-    availableThemes.append(["Kvantum", "default"])
+    # The default kvantum theme file is not available as a regular file in the filesystem
+    # but rather bundled in a QT resource with Kvantum.
+    # We'll consider its file to be '//default', which cannot exist due to the double slash
+    # and handle this case particularly when applying the kvantum theme.
+    availableThemes.append(["Kvantum", "Default", "//default"])
     lookupPaths = [
         os.path.join(GLib.get_user_config_dir(), "Kvantum"),
         os.path.join(Path(kvantumPath).parent.parent, "share", "Kvantum")
@@ -181,10 +186,12 @@ def getAvailableKvantumThemes(kvantumPath):
     for lookupPath in lookupPaths:
         try:
             for f in os.listdir(lookupPath):
-                if "#" not in f and os.path.isfile(os.path.join(lookupPath, f, f+".kvconfig")):
-                    availableThemes.append([f, f])
-                    if os.path.isfile(os.path.join(lookupPath, f, f+"Dark.kvconfig")):
-                        availableThemes.append([f+"Dark", f+"Dark"])
+                themeFilePath = os.path.join(lookupPath, f, f+".kvconfig")
+                if "#" not in f and os.path.isfile(themeFilePath):
+                    availableThemes.append([f, f, themeFilePath])
+                    darkThemePath = os.path.join(lookupPath, f, f+"Dark.kvconfig")
+                    if os.path.isfile(darkThemePath):
+                        availableThemes.append([f+"Dark", f+"Dark", darkThemePath])
         except:
             pass
     return uniquifySortedListStore(availableThemes)

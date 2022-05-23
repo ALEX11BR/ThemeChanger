@@ -6,5 +6,6 @@
     <file>defaultcursor.png</file>
     <file>searchablethemelist.ui</file>
     <file>window.ui</file>
+    <file>default.kvconfig</file>
   </gresource>
 </gresources>

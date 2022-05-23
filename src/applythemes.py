@@ -23,7 +23,7 @@ class BaseApplyThemes:
     """
     The base theme applying mechanism: write themes and settings to config files
     """
-    def applyThemes(self, props, gtk2Theme, gtk4Theme, kvantumTheme, cssText):
+    def applyThemes(self, props, gtk2Theme, gtk4Theme, kvantumTheme, kvantumThemeFilePath, cssText):
         gtkKeyFile = GLib.KeyFile()
 
         gtkKeyFile.set_string("Settings", "gtk-theme-name", gtk4Theme)
@@ -58,8 +58,27 @@ class BaseApplyThemes:
             iconKeyFile.save_to_file(os.path.join(GLib.get_home_dir(), ".icons", "default", "index.theme"))
             
         if kvantumTheme:
+            kvantumThemeKeyFile = GLib.KeyFile()
+            if kvantumThemeFilePath[:2] != "//":
+                kvantumThemeKeyFile.load_from_file(kvantumThemeFilePath, GLib.KeyFileFlags.NONE)
+            else:
+                kvantumThemeKeyFile.load_from_bytes(
+                    Gio.resources_lookup_data(
+                        "/com/github/alex11br/themechanger/default.kvconfig",
+                        Gio.ResourceLookupFlags.NONE
+                    ),
+                    GLib.KeyFileFlags.NONE
+                )
+            kvantumThemeKeyFile.set_boolean("Hacks", "iconless_pushbutton", not props.gtk_button_images)
+            kvantumThemeKeyFile.set_boolean("Hacks", "iconless_menu", not props.gtk_menu_images)
+            kvantumThemeKeyFile.set_boolean("%General", "transient_scrollbar", props.gtk_overlay_scrolling)
+
+            kvantumThemeDir = os.path.join(GLib.get_user_config_dir(), "Kvantum", kvantumTheme+"#")
+            os.makedirs(kvantumThemeDir, exist_ok=True)
+            kvantumThemeKeyFile.save_to_file(os.path.join(kvantumThemeDir, kvantumTheme+"#.kvconfig"))
+
             kvantumKeyFile = GLib.KeyFile()
-            kvantumKeyFile.set_string("General", "theme", kvantumTheme)
+            kvantumKeyFile.set_string("General", "theme", kvantumTheme+"#")
             kvantumKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"))
         
         with open(os.path.join(GLib.get_home_dir(), ".gtkrc-2.0"), "w") as gtk2File:
