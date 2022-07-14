@@ -206,6 +206,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         else:
             self.kvantumThemeBox.set_visible(False)
             self.kvantumThemeInstallButton.set_visible(False)
+            self.kvantumThemeFilePath = "//notthecase"
 
         self.darkVariantSwitch.set_active(self.gtkProps.gtk_application_prefer_dark_theme)
 

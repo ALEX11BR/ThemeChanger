@@ -1,5 +1,5 @@
 project('themechanger', 'c',
-          version: '0.11.0',
+          version: '0.11.1',
     meson_version: '>= 0.50.0',
   default_options: [ 'warning_level=2',
                    ],
