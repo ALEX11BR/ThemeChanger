@@ -1,9 +1,14 @@
 [Desktop Entry]
 Name=Theme Changer
+Name[es]=Cambiador de Tema
 Comment=Change themes
+Comment[es]=Cambia el tema del escritorio
 Exec=themechanger
 Icon=preferences-desktop-theme
 Terminal=false
 Type=Application
-Categories=GTK;Settings;DesktopSettings;
+Categories=GTK;Settings;DesktopSettings;X-XFCE;X-XFCE-PersonalSettings;X-XFCE-SettingsDialog;
+Keywords=themes;interface;styles;icons;
+Keywords[es]=temas;interfaz;estilos;iconos;
 StartupNotify=true
+X-Desktop-File-Install-Version=0.26
