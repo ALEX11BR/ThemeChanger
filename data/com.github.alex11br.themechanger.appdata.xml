@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>com.github.alex11br.themechanger.desktop</id>
+  <name>Theme Changer</name>
+  <name xml:lang="es">Cambiador de Tema</name>
+  <summary>Change themes</summary>
+  <summary xml:lang="es">Cambia el tema del escritorio</summary>
+  <developer_name>Popa Ioan Alexandru</developer_name>
+  <description>
+  <p>
+    This app is a theme changing utility for Linux, BSDs, and whatnots.
+    It lets the user change GTK 2/3/4, Kvantum, icon and cursor themes,
+    edit GTK CSS with live preview, and set some related options. It
+    also lets the user install icon and widget theme archives.
+  </p>
+  <p>
+Features:
+  </p>
+  <ul>
+   <li>Set the GTK3 theme, sync the GTK2, GTK4, Kvantum themes with it
+     or choose another one for each of these toolkits</li>
+   <li>Set the icon theme</li>
+   <li>Set the cursor theme, and tweak the cursor's size</li>
+   <li>Set all these themes with a special searchable selector with
+     previews for GTK3, icon and cursor themes</li>
+   <li>Set various options like whether buttons have images or not</li>
+   <li>Instantaneously apply your setting changes to the running
+     applications in GNOME, Cinnamon, Mate, XFCE, LXDE using
+     lxsession, or using xsettingsd (you must download xsettingsd and
+     run it in the background) for those that don't use GTK desktop
+     environments</li>
+   <li>Edit GTK CSS with instantaneous feedback of the changes made</li>
+   <li>Install new widget or icon themes from archives available e.g.
+     at gnome-look.org</li>
+   </ul>
+</description>
+  <keywords>
+    <keyword>styles</keyword>
+    <keyword>icons</keyword>
+    <keyword>interface</keyword>
+    <keyword>themes</keyword>
+    <keyword xml:lang="es">estilos</keyword>
+    <keyword xml:lang="es">iconos</keyword>
+    <keyword xml:lang="es">interfaz</keyword>
+    <keyword xml:lang="es">temas</keyword>
+  </keywords>
+  <kudos>
+    <kudo>HiDpiIcon</kudo>
+  </kudos>
+  <metadata_license>CC0</metadata_license>
+  <project_license>GPL-2.0</project_license>
+  <url type="bugtracker">https://github.com/ALEX11BR/ThemeChanger/issues</url>
+  <url type="homepage">https://github.com/ALEX11BR/ThemeChanger</url>
+  <project_group>XFCE</project_group>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main window of ThemChanger</caption>
+      <image height="528" width="888">https://raw.githubusercontent.com/ALEX11BR/ThemeChanger/master/screenshot1.png</image>
+    </screenshot>
+  </screenshots>
+  <update_contact />
+  <releases>
+    <release version="0.11.1" date="2022-07-14" />
+    <release version="0.11.0" date="2022-05-23" />
+  </releases>
+  <content_rating type="oars-1.0" />
+  <translation type="gettext">themechanger</translation>
+</component>
