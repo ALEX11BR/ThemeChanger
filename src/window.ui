@@ -248,7 +248,7 @@
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="label" translatable="yes">Instantaneous theme changing is supported. This means that setting another theme for GTK2 or GTK4 won't have any effect.</property>
+                                        <property name="label" translatable="yes">Instantaneous theme changing is supported. This means that setting another theme for GTK2 won't have any effect.</property>
                                         <property name="wrap">True</property>
                                       </object>
                                       <packing>

@@ -1,15 +1,15 @@
 # Copyright (C) 2021  Popa Ioan Alexandru
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -38,8 +38,8 @@ class SearchableThemeList(Gtk.Bin):
         if hasPixbuf:
             pixbufCell = Gtk.CellRendererPixbuf()
             themeColumn.pack_start(pixbufCell, False)
-            themeColumn.add_attribute(pixbufCell, "pixbuf", 2)
-            
+            themeColumn.add_attribute(pixbufCell, "pixbuf", 3)
+
         nameCell = Gtk.CellRendererText()
         themeColumn.pack_start(nameCell, True)
         themeColumn.add_attribute(nameCell, "text", 0)
@@ -54,10 +54,12 @@ class SearchableThemeList(Gtk.Bin):
                     self.themesTreeViewModelFiltered.get_path(row.iter),
                     None, False
                 )
+                self.selectedThemeRow = row
                 return
         # Maybe the selectedTheme isn't in the model; we'll properly handle this case here
         firstRow = self.themesTreeViewModelFiltered[0]
         self.selectedTheme = firstRow[1]
+        self.selectedThemeRow = firstRow
         self.themesTreeViewSelection.select_iter(firstRow.iter)
         self.themesTreeView.scroll_to_point(0, 0)
 
@@ -70,7 +72,7 @@ class SearchableThemeList(Gtk.Bin):
 
     def setScrolledWindowOverlayScrolling(self, state):
         self.themesScrolledWindow.set_overlay_scrolling(state)
-        
+
     def filterFunc(self, model, treeiter, data):
         return self.themesSearchEntry.get_text().lower() in model[treeiter][0].lower()
 
@@ -83,6 +85,7 @@ class SearchableThemeList(Gtk.Bin):
         if not treeiter:
             return
         self.selectedTheme = model[treeiter][1]
+        self.selectedThemeRow = model[treeiter]
         if self.hasThemeFilePath:
             self.onThemeSelectedCallback(self.selectedTheme, model[treeiter][2])
         else:
@@ -93,4 +96,3 @@ class SearchableThemeList(Gtk.Bin):
         self.themesTreeViewModelFiltered.refilter()
         # This handles the case in which the newly filtered model doen't have the selectedTheme anymore
         self.selectTheme()
-        

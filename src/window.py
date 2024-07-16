@@ -246,6 +246,22 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         defaultCursor = Gdk.Cursor.new_for_display(self.defaultDisplay, Gdk.CursorType.LEFT_PTR)
         self.defaultScreen.get_root_window().set_cursor(defaultCursor)
 
+    def getGtk4ThemeCssPath(self):
+        if self.anotherGtk4ThemeSwitch.get_active():
+            gtk4ThemeRoot = self.gtk4SearchableThemeList.selectedThemeRow[2]
+        else:
+            gtk4ThemeRoot = self.gtkSearchableThemeList.selectedThemeRow[2]
+
+        if gtk4ThemeRoot[:2] == "//":
+            return None
+
+        gtk4ThemeCssPath = os.path.join(gtk4ThemeRoot, "gtk-4.0", "gtk-dark.css" if self.gtkProps.gtk_application_prefer_dark_theme else "gtk.css")
+        if not os.path.isfile(gtk4ThemeCssPath):
+            gtk4ThemeCssPath = os.path.join(gtk4ThemeRoot, "gtk-4.0", "gtk.css")
+            if not os.path.isfile(gtk4ThemeCssPath):
+                return None
+        return gtk4ThemeCssPath
+
     def onGtkThemeChanged(self, themename):
         self.onSettingChanged()
 
@@ -380,7 +396,8 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
                 gtk4Theme=self.gtk4ThemeName,
                 kvantumTheme=self.kvantumThemeName,
                 kvantumThemeFilePath=self.kvantumThemeFilePath,
-                cssText=self.cssTextBuffer.props.text
+                cssText=self.cssTextBuffer.props.text,
+                gtk4ThemePath=self.getGtk4ThemeCssPath()
             )
         except Exception as err:
             showErrorDialog("Error: Could not apply settings", str(err))

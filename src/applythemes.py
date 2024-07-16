@@ -23,7 +23,7 @@ class BaseApplyThemes:
     """
     The base theme applying mechanism: write themes and settings to config files
     """
-    def applyThemes(self, props, gtk2Theme, gtk4Theme, kvantumTheme, kvantumThemeFilePath, cssText):
+    def applyThemes(self, props, gtk2Theme, gtk4Theme, kvantumTheme, kvantumThemeFilePath, cssText, gtk4ThemePath):
         gtkKeyFile = GLib.KeyFile()
 
         gtkKeyFile.set_string("Settings", "gtk-theme-name", gtk4Theme)
@@ -99,6 +99,9 @@ class BaseApplyThemes:
         with open(os.path.join(GLib.get_user_config_dir(), "gtk-3.0", "gtk.css"), "w") as cssFile:
             cssFile.write(cssText)
         with open(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "gtk.css"), "w") as cssFile:
+            if gtk4ThemePath is not None:
+                cssFile.write("* {all: unset;}\n")
+                cssFile.write(f'@import url("{gtk4ThemePath}")\n')
             cssFile.write(cssText)
 
 class GSettingsApplyThemes(BaseApplyThemes):
