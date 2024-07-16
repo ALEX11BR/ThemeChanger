@@ -1,15 +1,15 @@
 # Copyright (C) 2021  Popa Ioan Alexandru
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -27,7 +27,7 @@ from .searchablethemelist import SearchableThemeList
 @Gtk.Template(resource_path='/com/github/alex11br/themechanger/window.ui')
 class ThemechangerWindow(Gtk.ApplicationWindow):
     __gtype_name__ = 'ThemechangerWindow'
-    
+
     gtkProps = Gtk.Settings.get_default().props
 
     defaultDisplay = Gdk.Display.get_default()
@@ -107,14 +107,14 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
             self.defaultScreen, self.cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER+1
             # A higher priority than the USER one, to allow a theme change without requiring heavy meddling with the cssProvider
         )
-        
+
         # Now we'll set up the widgets
         try:
             with open(os.path.join(GLib.get_user_config_dir(), "gtk-3.0", "gtk.css"), "r") as cssFile:
                 self.cssTextBuffer.set_text(cssFile.read())
         # If the CSS file doesn't exist (or we are unable to access it for reading), we'll set up a nice text placeholder
         except:
-            self.cssTextBuffer.set_text("/* Feel free to edit this and see instantaneous results */")
+            self.cssTextBuffer.set_text("")
 
         self.themeApplier = getThemeApplier()
         if type(self.themeApplier) == BaseApplyThemes:
@@ -231,7 +231,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         self.hintingCombobox.set_active_id(self.gtkProps.gtk_xft_hintstyle if (self.gtkProps.gtk_xft_hinting != 0) else "hintnone")
 
         self.subpixelCombobox.set_active_id(self.gtkProps.gtk_xft_rgba or "none")
-        
+
 
     def updateGtkThemeCssProvider(self):
         gtkThemeCssProvider = Gtk.CssProvider.get_named(self.gtkProps.gtk_theme_name, "dark" if self.gtkProps.gtk_application_prefer_dark_theme else None)
@@ -245,7 +245,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         # This makes the cursor update to the recently selected theme
         defaultCursor = Gdk.Cursor.new_for_display(self.defaultDisplay, Gdk.CursorType.LEFT_PTR)
         self.defaultScreen.get_root_window().set_cursor(defaultCursor)
-    
+
     def onGtkThemeChanged(self, themename):
         self.onSettingChanged()
 
@@ -306,7 +306,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     def anotherGtk2ThemeSwitchStateSet(self, switch, state):
         self.gtk2ThemeName = self.gtk2SearchableThemeList.selectedTheme if state else self.gtkProps.gtk_theme_name
         self.gtk2SearchableThemeList.set_visible(state)
-    
+
     @Gtk.Template.Callback()
     def anotherGtk4ThemeSwitchStateSet(self, switch, state):
         self.gtk4ThemeName = self.gtk4SearchableThemeList.selectedTheme if state else self.gtkProps.gtk_theme_name
@@ -435,7 +435,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
         Whenever an option is changed, this function is called,
         either being defined as one of the callback functions from the 'window.ui' file,
         either as the callback function of SearchableThemeList's.
-        
+
         Its goal is to enable the 'Apply' button(s),
         that get disabled whenever the settings are applied.
         """

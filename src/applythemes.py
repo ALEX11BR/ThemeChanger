@@ -1,15 +1,15 @@
 # Copyright (C) 2021  Popa Ioan Alexandru
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -56,7 +56,7 @@ class BaseApplyThemes:
             iconKeyFile.set_string("Icon Theme", "Comment", "Default icon theme")
             iconKeyFile.set_string("Icon Theme", "Inherits", props.gtk_cursor_theme_name)
             iconKeyFile.save_to_file(os.path.join(GLib.get_home_dir(), ".icons", "default", "index.theme"))
-            
+
         if kvantumTheme:
             kvantumThemeKeyFile = GLib.KeyFile()
             if kvantumThemeFilePath[:2] != "//":
@@ -80,7 +80,7 @@ class BaseApplyThemes:
             kvantumKeyFile = GLib.KeyFile()
             kvantumKeyFile.set_string("General", "theme", kvantumTheme+"#")
             kvantumKeyFile.save_to_file(os.path.join(GLib.get_user_config_dir(), "Kvantum", "kvantum.kvconfig"))
-        
+
         with open(os.path.join(GLib.get_home_dir(), ".gtkrc-2.0"), "w") as gtk2File:
             gtk2File.write(f'gtk-theme-name="{gtk2Theme}"\n')
             gtk2File.write(f'gtk-icon-theme-name="{props.gtk_icon_theme_name}"\n')
@@ -114,7 +114,7 @@ class GSettingsApplyThemes(BaseApplyThemes):
         self.settings.set_string("icon-theme", props.gtk_icon_theme_name)
         self.settings.set_string("gtk-key-theme", props.gtk_key_theme_name or "")
         self.settings.set_string("font-name", props.gtk_font_name)
-        
+
 class MateApplyThemes(GSettingsApplyThemes):
     """
     Live reloadable theme & options setting code specific to Mate.
@@ -137,7 +137,7 @@ class MateApplyThemes(GSettingsApplyThemes):
         else:
             self.settingsFont.set_string("antialiasing", "grayscale" if props.gtk_xft_antialias else "none")
         self.settingsFont.set_string("hinting", props.gtk_xft_hintstyle[4:]) # drop the first 4 letters ('hint' in all cases)
-        
+
         self.settings.set_boolean("gtk-overlay-scrolling", props.gtk_overlay_scrolling)
         self.settings.set_boolean("buttons-have-icons", props.gtk_button_images)
         self.settings.set_boolean("menus-have-icons", props.gtk_menu_images)
@@ -159,9 +159,11 @@ class GnomeApplyThemes(CinnGnomeApplyThemes):
     """
     def __init__(self):
         self.settings = Gio.Settings.new("org.gnome.desktop.interface")
-    
+
     def applyThemes(self, props, **kwargs):
         super().applyThemes(props, **kwargs)
+
+        self.settings.set_string("color-scheme", "prefer-dark" if props.gtk_application_prefer_dark_theme else "default")
 
         if props.gtk_xft_rgba != "none":
             self.settings.set_string("font-rgba-order", props.gtk_xft_rgba or "rgb")
@@ -233,18 +235,18 @@ class LXSessionApplyThemes(XApplyThemes):
 
     def applyThemes(self, props, **kwargs):
         super().applyThemes(props, **kwargs)
-        
+
         lxsessionKeyFile = GLib.KeyFile()
         lxsessionKeyFile.load_from_file(self.lxsessionConfigPath, GLib.KeyFileFlags.NONE)
 
         for option in self.options:
             value = self.options[option]
-            
+
             if type(value) is str:
                 lxsessionKeyFile.set_string("GTK", "s"+option, value)
             else:
                 lxsessionKeyFile.set_integer("GTK", "i"+option, int(value))
-        
+
         lxsessionKeyFile.save_to_file(self.lxsessionConfigPath)
 
 class XfconfApplyThemes(XApplyThemes):
@@ -263,7 +265,7 @@ class XfconfApplyThemes(XApplyThemes):
 
         for option in self.options:
             value = self.options[option]
-            
+
             if option == "Xft/DPI":
                 value = int(value/1024)
             if type(value) is int:
@@ -293,14 +295,14 @@ class XsettingsdApplyThemes(XApplyThemes):
         with open(self.confFile, "w") as file:
             for option in self.options:
                 value = self.options[option]
-                
+
                 if type(value) is str:
                     value = f'"{value}"'
                 elif type(value) is bool:
                     value = int(value)
-                
+
                 file.write(f'{option} {value}\n')
-        
+
         subprocess.run(["pkill", "-HUP", "^xsettingsd$"])
 
 def isRunning(app):
