@@ -101,7 +101,7 @@ class BaseApplyThemes:
         with open(os.path.join(GLib.get_user_config_dir(), "gtk-4.0", "gtk.css"), "w") as cssFile:
             if gtk4ThemePath is not None:
                 cssFile.write("* {all: unset;}\n")
-                cssFile.write(f'@import url("{gtk4ThemePath}")\n')
+                cssFile.write(f'@import url("{gtk4ThemePath}");\n')
             cssFile.write(cssText)
 
 class GSettingsApplyThemes(BaseApplyThemes):
