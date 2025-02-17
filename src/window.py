@@ -420,7 +420,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     def installWidgetTheme(self, *args):
         self.installArchive(
             "widget", "Widgets",
-            os.path.join(GLib.get_home_dir(), ".themes"),
+            os.path.join(GLib.get_user_data_dir(), "themes"),
             "gtk-3.0/gtk.css", 2, lambda x: True
         )
         self.gtkSearchableThemeList.setThemesTreeViewModel(getAvailableGtk3Themes())
@@ -431,7 +431,7 @@ class ThemechangerWindow(Gtk.ApplicationWindow):
     def installIconTheme(self, *args):
         self.installArchive(
             "icon", "Icons",
-            os.path.join(GLib.get_home_dir(), ".icons"),
+            os.path.join(GLib.get_user_data_dir(), "icons"),
             "index.theme", 1, checkIconIndexFile
         )
         self.iconSearchableThemeList.setThemesTreeViewModel(getAvailableIconThemes())

@@ -55,7 +55,7 @@ class BaseApplyThemes:
             iconKeyFile.set_string("Icon Theme", "Name", "Default")
             iconKeyFile.set_string("Icon Theme", "Comment", "Default icon theme")
             iconKeyFile.set_string("Icon Theme", "Inherits", props.gtk_cursor_theme_name)
-            iconKeyFile.save_to_file(os.path.join(GLib.get_home_dir(), ".icons", "default", "index.theme"))
+            iconKeyFile.save_to_file(os.path.join(GLib.get_user_data_dir(), "icons", "default", "index.theme"))
 
         if kvantumTheme:
             kvantumThemeKeyFile = GLib.KeyFile()
