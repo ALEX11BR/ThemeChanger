@@ -56,6 +56,10 @@ class SearchableThemeList(Gtk.Bin):
                 )
                 self.selectedThemeRow = row
                 return
+        # If we don't have rows (this should happen only on gtk2 themes, as the other kinds of themes supported by this app have guaranteed at least an entry), return early, no worries.
+        # self.selectedTheme is already set by __init__, and the other fields of the class are private
+        if not len(self.themesTreeViewModelFiltered):
+            return
         # Maybe the selectedTheme isn't in the model; we'll properly handle this case here
         firstRow = self.themesTreeViewModelFiltered[0]
         self.selectedTheme = firstRow[1]
