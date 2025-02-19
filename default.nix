@@ -1,7 +1,7 @@
 { pkgs, python3Packages }:
 python3Packages.buildPythonApplication rec {
     pname = "themechanger";
-    version = "0.12.0";
+    version = "0.12.1";
     format = "other";
     src = ./.;
     nativeBuildInputs = with pkgs; [
