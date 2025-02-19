@@ -16,6 +16,7 @@ python3Packages.buildPythonApplication rec {
     buildInputs = with pkgs; [
         glib
         gtk3
+        mate.mate-settings-daemon
         python3
         gsettings-desktop-schemas
     ];

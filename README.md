@@ -43,5 +43,5 @@ In the folder with the source (obtainable e.g. by running `git clone https://git
 - Copy global theme files locally so that flatpak apps can use them (maybe?)
 - Option for configuring named colors
 - Clean the code overall
-- Warn when GTK2_RC_FILES is set
+- Warn when `GTK2_RC_FILES` is set
 - Don't rely on spawning commands for e.g. querying processes
