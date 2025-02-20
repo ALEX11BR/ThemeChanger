@@ -21,6 +21,14 @@ Install the `themechanger-git` package from the AUR the way you like it. For ins
 ```
 yay -S themechanger-git
 ```
+## Fedora
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/alex11br/ThemeChanger/package/themechanger/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/alex11br/ThemeChanger/package/themechanger/)
+
+Install `themechanger` from the [`alex11br/ThemeChanger` COPR](https://copr.fedorainfracloud.org/coprs/alex11br/ThemeChanger/), like this:
+```
+sudo dnf copr enable alex11br/ThemeChanger
+sudo dnf copr install themechanger
+```
 ## Nix(OS)
 Install the `themechanger` package from nixpkgs, like this:
 ```
