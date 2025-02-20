@@ -27,7 +27,7 @@ BuildRequires:  /usr/bin/pkg-config
 Requires:       gobject-introspection%{?_isa}
 Requires:       gtk3%{?_isa}
 Requires:       hicolor-icon-theme
-Requires:       python3{?_isa}
+Requires:       python3%{?_isa}
 Requires:       python3-gobject-base%{?_isa}
 
 %description
