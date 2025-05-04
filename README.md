@@ -27,7 +27,7 @@ yay -S themechanger-git
 Install `themechanger` from the [`alex11br/ThemeChanger` COPR](https://copr.fedorainfracloud.org/coprs/alex11br/ThemeChanger/), like this:
 ```
 sudo dnf copr enable alex11br/ThemeChanger
-sudo dnf copr install themechanger
+sudo dnf install themechanger
 ```
 ## Nix(OS)
 Install the `themechanger` package from nixpkgs, like this:
